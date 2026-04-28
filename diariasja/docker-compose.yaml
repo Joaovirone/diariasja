@@ -2,6 +2,7 @@ services:
 
   mysql:
     image: 'mysql:latest'
+    container_name: diarias-ja-mysql
     environment:
       - 'MYSQL_DATABASE=mydatabase'
       - 'MYSQL_PASSWORD=secret'
