@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.diariasja.aws.dto.DiariaRequestDTO;
 import com.diariasja.aws.dto.DiariaResponseDTO;
+import com.diariasja.aws.dto.mappper.DiariaMapper; // Mantive com 3 'p's conforme o seu código
 import com.diariasja.aws.entity.CategoriaServico;
 import com.diariasja.aws.entity.Diaria;
 import com.diariasja.aws.entity.Usuario;
@@ -23,11 +24,14 @@ public class DiariaService {
     @Autowired private DiariaRepository diariaRepository;
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private CategoriaServicoRepository categoriaRepository;
+    @Autowired private DiariaMapper mapper;
+    
+    // Injetando o serviço de Fila SQS (AWS) para o momento do aceite
+    @Autowired private NotificacaoService notificacaoService;
 
+    // --- 1. REGRA: SOLICITAR SERVIÇO ---
     @Transactional
-    public Diaria solicitarServico(DiariaRequestDTO dto) {
-        
-        // 1. Busca todos os envolvidos ou lança erro 404
+    public DiariaResponseDTO solicitarServico(DiariaRequestDTO dto) { 
         Usuario contratante = usuarioRepository.findById(dto.contratanteId())
             .orElseThrow(() -> new ResourceNotFoundException("Contratante não encontrado"));
             
@@ -37,28 +41,64 @@ public class DiariaService {
         CategoriaServico categoria = categoriaRepository.findById(dto.categoriaId())
             .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
 
-        // 2. Monta a Entidade para salvar no banco
         Diaria diaria = new Diaria();
         diaria.setContratante(contratante);
         diaria.setContratado(contratado);
         diaria.setCategoria(categoria);
         diaria.setDataServico(dto.dataServico());
-        diaria.setStatus(StatusDiaria.PENDENTE); // Regra: Todo serviço nasce pendente
+        diaria.setStatus(StatusDiaria.PENDENTE); 
 
-        // 3. Salva no RDS
-        return diariaRepository.save(diaria);
-        
-        // Futuramente de DevOps: Aqui acionaremos o Amazon SQS para notificar o contratado!
+        Diaria salva = diariaRepository.save(diaria);
+        return mapper.toResponseDTO(salva); 
     }
 
-    // Adicione este método no DiariaService
-    @Transactional(readOnly = true) // readOnly = true melhora a performance no banco para consultas
-    public Page<DiariaResponseDTO> listarMinhasDiariasComoContratante(Long contratanteId, Pageable pageable) {
-        // Busca a página de entidades no banco
-        Page<Diaria> diarias = diariaRepository.findByContratanteId(contratanteId, pageable);
+    // --- 2. REGRA: ACEITAR DIÁRIA (Com Fila AWS) ---
+    @Transactional
+    public DiariaResponseDTO aceitarDiaria(Long idDiaria, Long idProfissional) {
+        Diaria diaria = diariaRepository.findById(idDiaria)
+            .orElseThrow(() -> new ResourceNotFoundException("Diária não encontrada"));
+
+        if (!diaria.getContratado().getId().equals(idProfissional)) {
+            throw new IllegalArgumentException("Apenas o profissional escalado pode aceitar.");
+        }
+        if (diaria.getStatus() != StatusDiaria.PENDENTE) {
+            throw new IllegalArgumentException("Apenas diárias pendentes podem ser aceitas.");
+        }
+
+        diaria.setStatus(StatusDiaria.CONFIRMADA);
+        Diaria salva = diariaRepository.save(diaria);
+
+        // Dispara mensagem assíncrona
+        String msg = "O profissional " + diaria.getContratado().getNome() + " aceitou sua solicitação!";
+        notificacaoService.notificarContratante(diaria.getContratante().getEmail(), msg);
+
+        return mapper.toResponseDTO(salva);
+    }
+
+    // --- 3. REGRA: AVALIAR SERVIÇO ---
+    @Transactional
+    public DiariaResponseDTO avaliarDiaria(Long idDiaria, int nota) {
+        Diaria diaria = diariaRepository.findById(idDiaria)
+            .orElseThrow(() -> new ResourceNotFoundException("Diária não encontrada"));
+
+        if (diaria.getStatus() != StatusDiaria.CONCLUIDA) {
+            throw new IllegalArgumentException("Apenas serviços concluídos podem ser avaliados.");
+        }
+        if (nota < 1 || nota > 5) {
+            throw new IllegalArgumentException("A nota deve ser entre 1 e 5 estrelas.");
+        }
+
+        // Se você já adicionou "private Integer nota;" na entidade Diaria, descomente a linha abaixo:
+        // diaria.setNota(nota); 
         
-        // O Spring Data Page já possui um método .map() que funciona perfeitamente com nosso Mapper!
-        return diarias.map(mapper::toResponseDTO);
+        return mapper.toResponseDTO(diariaRepository.save(diaria));
+    }
+
+    // --- 4. CONSULTAS PAGINADAS ---
+    @Transactional(readOnly = true)
+    public Page<DiariaResponseDTO> listarMinhasDiariasComoContratante(Long contratanteId, Pageable pageable) {
+        Page<Diaria> diarias = diariaRepository.findByContratanteId(contratanteId, pageable);
+        return diarias.map(mapper::toResponseDTO); 
     }
 
     @Transactional(readOnly = true)
