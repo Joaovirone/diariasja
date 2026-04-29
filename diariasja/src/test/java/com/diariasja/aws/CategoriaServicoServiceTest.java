@@ -1,5 +1,7 @@
 package com.diariasja.aws;
 
+import com.diariasja.aws.dto.CategoriaServicoResponseDTO;
+import com.diariasja.aws.dto.mappper.CategoriaServicoMapper;
 import com.diariasja.aws.entity.CategoriaServico;
 import com.diariasja.aws.exception.ResourceNotFoundException;
 import com.diariasja.aws.repository.CategoriaServicoRepository;
@@ -18,59 +20,64 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockitoExtension.class) // Habilita o Mockito neste teste
+@ExtendWith(MockitoExtension.class)
 public class CategoriaServicoServiceTest {
 
-    // @InjectMocks cria uma instância real do Service, 
-    // mas injeta os "dublês" (Mocks) dentro dele no lugar das dependências reais.
     @InjectMocks
     private CategoriaServicoService service;
 
-    // @Mock cria o "dublê" do banco de dados. Ele não conecta no MySQL ou AWS RDS.
     @Mock
     private CategoriaServicoRepository repository;
 
-    private CategoriaServico categoriaPadrao;
+    // Agora precisamos "mockar" o Mapper, pois o Service o utiliza
+    @Mock
+    private CategoriaServicoMapper mapper;
 
-    @BeforeEach // Roda antes de cada @Test para preparar os dados
+    private CategoriaServico categoriaPadrao;
+    private CategoriaServicoResponseDTO responsePadrao;
+
+    @BeforeEach
     void setUp() {
+        // Entidade que o banco devolveria
         categoriaPadrao = new CategoriaServico();
         categoriaPadrao.setId(1L);
         categoriaPadrao.setNome("Faxina");
         categoriaPadrao.setDescricao("Limpeza geral");
+
+        // DTO que o Mapper deve gerar
+        responsePadrao = new CategoriaServicoResponseDTO(1L, "Faxina", "Limpeza geral");
     }
 
     @Test
-    @DisplayName("Deve retornar uma categoria quando o ID existir no banco")
+    @DisplayName("Deve retornar um DTO de categoria quando o ID existir no banco")
     void buscarPorId_ComSucesso() {
-        // 1. ARRANGE (Preparação): Ensinamos o dublê (Mock) o que ele deve fazer.
-        // "Quando o service chamar repository.findById(1L), devolva a categoriaPadrao"
+        // 1. ARRANGE
         Mockito.when(repository.findById(1L)).thenReturn(Optional.of(categoriaPadrao));
+        // Ensinamos o Mockito a converter a entidade no DTO
+        Mockito.when(mapper.toResponseDTO(categoriaPadrao)).thenReturn(responsePadrao);
 
-        // 2. ACT (Ação): Executamos o método real da nossa regra de negócio
-        CategoriaServico resultado = service.buscarPorId(1L);
+        // 2. ACT - Agora recebe o ResponseDTO!
+        CategoriaServicoResponseDTO resultado = service.buscarPorId(1L);
 
-        // 3. ASSERT (Verificação): Confirmamos se a lógica funcionou como esperado
-        assertNotNull(resultado); // Garante que não veio nulo
-        assertEquals("Faxina", resultado.getNome()); // Garante que o nome veio correto
-        assertEquals(1L, resultado.getId());
+        // 3. ASSERT
+        assertNotNull(resultado);
+        // Como o DTO é um 'record', acessamos as propriedades como métodos: .nome() em vez de .getNome()
+        assertEquals("Faxina", resultado.nome()); 
+        assertEquals(1L, resultado.id());
         
-        // Verifica se o método do banco foi chamado exatamente 1 vez
         Mockito.verify(repository, Mockito.times(1)).findById(1L); 
+        Mockito.verify(mapper, Mockito.times(1)).toResponseDTO(categoriaPadrao);
     }
 
     @Test
     @DisplayName("Deve lançar ResourceNotFoundException quando o ID não existir")
     void buscarPorId_IdNaoExiste_LancaExcecao() {
-        // 1. ARRANGE: "Quando pedirem o ID 99, simule que o banco não achou nada (Optional.empty)"
         Mockito.when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        // 2 & 3. ACT & ASSERT juntos: Verificamos se ao chamar com ID 99, a nossa exceção customizada é lançada
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             service.buscarPorId(99L);
         });
 
-        // Garantimos que a mensagem de erro formatada para o usuário está correta
         assertEquals("Categoria não encontrada com ID: 99", exception.getMessage());
     }
 }
