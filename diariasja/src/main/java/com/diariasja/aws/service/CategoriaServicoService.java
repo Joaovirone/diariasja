@@ -7,6 +7,8 @@ import com.diariasja.aws.exception.ResourceNotFoundException;
 import com.diariasja.aws.dto.mappper.*;
 import com.diariasja.aws.repository.CategoriaServicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,5 +50,18 @@ public class CategoriaServicoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada com ID: " + id));
                 
         return mapper.toResponseDTO(categoria);
+    }
+    
+    @Transactional(readOnly = true)
+    public Page<CategoriaServicoResponseDTO> listarComPaginacao(String nome, Pageable pageable) {
+        Page<CategoriaServico> categorias;
+        
+        if (nome != null && !nome.isEmpty()) {
+            categorias = repository.findByNomeContainingIgnoreCase(nome, pageable);
+        } else {
+            categorias = repository.findAll(pageable);
+        }
+        
+        return categorias.map(mapper::toResponseDTO);
     }
 }
