@@ -1,10 +1,13 @@
 package com.diariasja.aws.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.diariasja.aws.dto.DiariaRequestDTO;
+import com.diariasja.aws.dto.DiariaResponseDTO;
 import com.diariasja.aws.entity.CategoriaServico;
 import com.diariasja.aws.entity.Diaria;
 import com.diariasja.aws.entity.Usuario;
@@ -46,5 +49,21 @@ public class DiariaService {
         return diariaRepository.save(diaria);
         
         // Futuramente de DevOps: Aqui acionaremos o Amazon SQS para notificar o contratado!
+    }
+
+    // Adicione este método no DiariaService
+    @Transactional(readOnly = true) // readOnly = true melhora a performance no banco para consultas
+    public Page<DiariaResponseDTO> listarMinhasDiariasComoContratante(Long contratanteId, Pageable pageable) {
+        // Busca a página de entidades no banco
+        Page<Diaria> diarias = diariaRepository.findByContratanteId(contratanteId, pageable);
+        
+        // O Spring Data Page já possui um método .map() que funciona perfeitamente com nosso Mapper!
+        return diarias.map(mapper::toResponseDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<DiariaResponseDTO> listarDiariasPendentesDoProfissional(Long contratadoId, Pageable pageable) {
+        Page<Diaria> diarias = diariaRepository.findByContratadoIdAndStatus(contratadoId, StatusDiaria.PENDENTE, pageable);
+        return diarias.map(mapper::toResponseDTO);
     }
 }

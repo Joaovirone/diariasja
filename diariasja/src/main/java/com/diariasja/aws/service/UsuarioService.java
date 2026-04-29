@@ -8,6 +8,7 @@ import com.diariasja.aws.dto.UsuarioRequestDTO;
 import com.diariasja.aws.dto.UsuarioResponseDTO;
 import com.diariasja.aws.dto.mappper.UsuarioMapper;
 import com.diariasja.aws.entity.Usuario;
+import com.diariasja.aws.entity.enums.TipoUsuario;
 import com.diariasja.aws.repository.UsuarioRepository;
 
 @Service
@@ -31,5 +32,12 @@ public class UsuarioService {
         
         // 3. Devolve um ResponseDTO seguro e sem a senha
         return mapper.toResponseDTO(usuarioSalvo);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UsuarioResponseDTO> listarProfissionaisAtivos(Pageable pageable) {
+        // Busca apenas usuários do tipo CONTRATADO e que estão ativos
+        Page<Usuario> profissionais = repository.findByTipoAndAtivoTrue(TipoUsuario.CONTRATADO, pageable);
+        return profissionais.map(mapper::toResponseDTO);
     }
 }

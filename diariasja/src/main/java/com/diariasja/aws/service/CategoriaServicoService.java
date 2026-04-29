@@ -49,4 +49,17 @@ public class CategoriaServicoService {
                 
         return mapper.toResponseDTO(categoria);
     }
+    
+    @Transactional(readOnly = true)
+    public Page<CategoriaServicoResponseDTO> listarComPaginacao(String nome, Pageable pageable) {
+        Page<CategoriaServico> categorias;
+        
+        if (nome != null && !nome.isEmpty()) {
+            categorias = repository.findByNomeContainingIgnoreCase(nome, pageable);
+        } else {
+            categorias = repository.findAll(pageable);
+        }
+        
+        return categorias.map(mapper::toResponseDTO);
+    }
 }
