@@ -1,10 +1,14 @@
 package com.diariasja.aws.service;
 
-import com.diariasja.aws.entity.Usuario;
-import com.diariasja.aws.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.diariasja.aws.dto.UsuarioRequestDTO;
+import com.diariasja.aws.dto.UsuarioResponseDTO;
+import com.diariasja.aws.dto.mappper.UsuarioMapper;
+import com.diariasja.aws.entity.Usuario;
+import com.diariasja.aws.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
@@ -12,14 +16,20 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository repository;
 
-    @Transactional // Se der erro no meio do processo, ele desfaz a operação no banco (Rollback)
-    public Usuario cadastrar(Usuario usuario) {
-        // 1. Regra de Negócio: Validar idade (RN01)
-        // int idade = Period.between(usuario.getDataNascimento(), LocalDate.now()).getYears();
-        // se idade < 18, lançar exceção.
+    @Autowired
+    private UsuarioMapper mapper;
 
-        // 2. Aqui, futuramente, faremos o hash da senha (Bcrypt) antes de salvar
+    @Transactional
+    public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto) {
+        // 1. Converte DTO para Entidade numa linha só
+        Usuario usuario = mapper.toEntity(dto);
         
-        return repository.save(usuario);
+        // Futuro: Criptografar a senha aqui
+        
+        // 2. Salva no banco
+        Usuario usuarioSalvo = repository.save(usuario);
+        
+        // 3. Devolve um ResponseDTO seguro e sem a senha
+        return mapper.toResponseDTO(usuarioSalvo);
     }
 }

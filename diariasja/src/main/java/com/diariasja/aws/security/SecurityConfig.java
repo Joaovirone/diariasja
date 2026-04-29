@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -15,17 +16,22 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configure(http))
+            // API REST não deve guardar estado/sessão (Stateless)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) 
             .authorizeHttpRequests(auth -> auth
-                // Liberando as rotas da nossa API pública E as rotas geradas pelo Swagger
                 .requestMatchers(
                         "/api/usuarios/cadastrar", 
                         "/api/categorias/**",
-                        "/swagger-ui/**",       // Interface gráfica do Swagger
-                        "/v3/api-docs/**",      // O JSON bruto padrão OpenAPI (usado pelo API Gateway)
-                        "/swagger-ui.html"      // Redirecionamento padrão
+                        "/swagger-ui/**",       
+                        "/v3/api-docs/**",      
+                        "/swagger-ui.html"      
                 ).permitAll()
+                // A rota de diárias agora é protegida! Exige Token.
+                .requestMatchers("/api/diarias/**").authenticated() 
                 .anyRequest().authenticated()
-            );
+            )
+            // Avisa o Spring que vamos usar validação de Token JWT (via AWS Cognito)
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}));
             
         return http.build();
     }

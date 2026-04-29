@@ -1,7 +1,12 @@
 package com.diariasja.aws.controller;
 
+import com.diariasja.aws.dto.UsuarioRequestDTO;
+import com.diariasja.aws.dto.UsuarioResponseDTO;
 import com.diariasja.aws.entity.Usuario;
 import com.diariasja.aws.service.UsuarioService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,12 +18,9 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService service;
-
     @PostMapping("/cadastrar")
-    public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario) {
-        // Nota Senior: Em produção, nunca recebemos e devolvemos a Entidade diretamente.
-        // Usamos DTOs (Data Transfer Objects) para não vazar a senha no JSON de resposta.
-        Usuario novoUsuario = service.cadastrar(usuario);
-        return new ResponseEntity<>(novoUsuario, HttpStatus.CREATED);
+    public ResponseEntity<UsuarioResponseDTO> cadastrar(@Valid @RequestBody UsuarioRequestDTO dto) {
+        UsuarioResponseDTO response = service.cadastrar(dto);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }

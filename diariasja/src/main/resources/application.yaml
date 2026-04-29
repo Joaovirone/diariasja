@@ -18,7 +18,7 @@ spring:
   # Configuração do Hibernate (Ajustado para MySQL)
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
