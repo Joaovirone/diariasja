@@ -11,9 +11,14 @@ services:
       MYSQL_PASSWORD: secret
       MYSQL_ROOT_PASSWORD: verysecret
     ports:
-      - "3300:3306" # Você acessa pelo 3300 no DBeaver/Workbench
+      - "3300:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-pverysecret"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     volumes:
-      - mysql_data:/var/lib/mysql # Garante que os dados não sumam se o container cair
+      - mysql_data:/var/lib/mysql
 
   # 2. Nosso Servidor de Cache
   redis:
@@ -24,17 +29,18 @@ services:
 
   # 3. Nossa API Spring Boot
   backend:
-    build: . # Manda o Docker ler o nosso Dockerfile
+    build: . 
     container_name: diarias-ja-api
     ports:
       - "8080:8080"
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
     environment:
-      # Sobrescrevemos as variáveis do application.yml com o nome dos containers!
       - DB_HOST=mysql
-      - DB_PORT=3306 # Porta interna do Docker (e não a 3300)
+      - DB_PORT=3306
       - DB_NAME=mydatabase
       - DB_USER=myuser
       - DB_PASSWORD=secret
