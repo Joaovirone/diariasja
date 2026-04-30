@@ -1,10 +1,11 @@
 package com.diariasja.aws.config;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.Contact;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
 
 @Configuration
 public class SwaggerConfig {
@@ -19,6 +20,6 @@ public class SwaggerConfig {
                                      "Esta especificação está formatada para futura integração com o Amazon API Gateway.")
                         .contact(new Contact()
                                 .name("Equipe de Desenvolvimento")
-                                .email("admin@diariasja.com")));
+                                .email("jovmamikl@gmail.com")));
     }
 }
