@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: diarias-ja-api
+
+  # Conexão com o Banco de Dados (Amazon RDS)
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mydatabase}?useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USER:myuser}
+    password: ${DB_PASSWORD:secret}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # Configuração do Flyway (Controle de Versão do Banco)
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  # Configuração do Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: validate # Em produção SEMPRE validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: ${SHOW_SQL:true} # Variável para podermos desligar o log em produção
+
+  # Conexão com o Redis (Amazon ElastiCache)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  # Configuração do Cache do Spring
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000 # Cache expira em 10 minutos (600.000 ms)
+
+# Nossas variáveis customizadas de Segurança
+api:
+  security:
+    token:
+      secret: ${JWT_SECRET:chave-super-secreta-ambiente-local-123456}

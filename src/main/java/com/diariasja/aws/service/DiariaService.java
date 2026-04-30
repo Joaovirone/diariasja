@@ -88,8 +88,7 @@ public class DiariaService {
             throw new IllegalArgumentException("A nota deve ser entre 1 e 5 estrelas.");
         }
 
-        // Se você já adicionou "private Integer nota;" na entidade Diaria, descomente a linha abaixo:
-        // diaria.setNota(nota); 
+         diaria.setNota(nota); 
         
         return mapper.toResponseDTO(diariaRepository.save(diaria));
     }

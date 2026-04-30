@@ -32,6 +32,7 @@ CREATE TABLE tb_diarias (
     categoria_id BIGINT NOT NULL,
     data_servico DATE NOT NULL,
     status VARCHAR(50) NOT NULL,
+    nota INT,
     
     -- Campos de Auditoria
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

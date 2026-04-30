@@ -31,6 +31,9 @@ public class Diaria extends EntidadeAuditavel {
     @Column(nullable = false)
     private LocalDate dataServico;
 
+    @Column(nullable= true)
+    private Integer nota;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusDiaria status;
