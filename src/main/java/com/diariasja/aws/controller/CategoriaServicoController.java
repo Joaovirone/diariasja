@@ -1,7 +1,5 @@
 package com.diariasja.aws.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,22 +32,17 @@ public class CategoriaServicoController {
         CategoriaServicoResponseDTO novaCategoria = service.criar(dto);
         return new ResponseEntity<>(novaCategoria, HttpStatus.CREATED);
     }
-
-    @GetMapping
-    public ResponseEntity<List<CategoriaServicoResponseDTO>> listar() {
-        return ResponseEntity.ok(service.listarTodas());
-    }
     
     @GetMapping("/{id}")
     public ResponseEntity<CategoriaServicoResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
+    // Mantemos apenas a listagem paginada (o método da Lista pura foi removido)
     @GetMapping
     public ResponseEntity<Page<CategoriaServicoResponseDTO>> listar(
             @RequestParam(required = false) String nome,
             @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
         return ResponseEntity.ok(service.listarComPaginacao(nome, pageable));
     }
-    
 }

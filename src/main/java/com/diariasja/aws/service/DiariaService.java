@@ -93,6 +93,25 @@ public class DiariaService {
         return mapper.toResponseDTO(diariaRepository.save(diaria));
     }
 
+    @Transactional
+    public DiariaResponseDTO cancelarDiaria(Long idDiaria, Long idUsuarioLogado) {
+        Diaria diaria = diariaRepository.findById(idDiaria)
+            .orElseThrow(() -> new ResourceNotFoundException("Diária não encontrada"));
+
+        // Regra: Só quem criou a diária (ou um admin) pode cancelar
+        if (!diaria.getContratante().getId().equals(idUsuarioLogado)) {
+            throw new IllegalArgumentException("Você não tem permissão para cancelar esta diária.");
+        }
+        
+        // Regra: Não pode cancelar se já estiver concluída ou cancelada
+        if (diaria.getStatus() == StatusDiaria.CONCLUIDA || diaria.getStatus() == StatusDiaria.CANCELADA) {
+            throw new IllegalArgumentException("Esta diária não pode mais ser cancelada.");
+        }
+
+        diaria.setStatus(StatusDiaria.CANCELADA);
+        return mapper.toResponseDTO(diariaRepository.save(diaria));
+    }
+
     // --- 4. CONSULTAS PAGINADAS ---
     @Transactional(readOnly = true)
     public Page<DiariaResponseDTO> listarMinhasDiariasComoContratante(Long contratanteId, Pageable pageable) {

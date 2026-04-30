@@ -6,6 +6,7 @@ import com.diariasja.aws.entity.CategoriaServico;
 import com.diariasja.aws.exception.ResourceNotFoundException;
 import com.diariasja.aws.dto.mappper.*;
 import com.diariasja.aws.repository.CategoriaServicoRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.cache.annotation.Cacheable;
+
 
 @Service
 public class CategoriaServicoService {
@@ -53,6 +57,7 @@ public class CategoriaServicoService {
     }
     
     @Transactional(readOnly = true)
+    @Cacheable(value = "categorias", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + (#nome != null ? #nome : 'todas')")
     public Page<CategoriaServicoResponseDTO> listarComPaginacao(String nome, Pageable pageable) {
         Page<CategoriaServico> categorias;
         

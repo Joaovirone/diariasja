@@ -1,12 +1,22 @@
 package com.diariasja.aws.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping; // Importante: trazer o DTO de resposta
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.diariasja.aws.dto.DiariaRequestDTO;
-import com.diariasja.aws.dto.DiariaResponseDTO; // Importante: trazer o DTO de resposta
+import com.diariasja.aws.dto.DiariaResponseDTO;
 import com.diariasja.aws.service.DiariaService;
 
 import jakarta.validation.Valid;
@@ -15,33 +25,42 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/diarias")
 public class DiariaController {
 
-    @Autowired
-    private DiariaService service;
+    @Autowired private DiariaService service;
 
     @PostMapping("/solicitar")
-    // CORREÇÃO 1: Alterar ResponseEntity<Diaria> para ResponseEntity<DiariaResponseDTO>
     public ResponseEntity<DiariaResponseDTO> solicitar(@Valid @RequestBody DiariaRequestDTO dto) {
-        
-        // CORREÇÃO 2: A variável que recebe o resultado do service tem de ser do tipo DTO
         DiariaResponseDTO novaDiaria = service.solicitarServico(dto);
-        
         return new ResponseEntity<>(novaDiaria, HttpStatus.CREATED);
     }
 
-    // Aproveitando, aqui estão os endpoints para as regras de negócio que implementamos no Service
     @PatchMapping("/{id}/aceitar")
-    public ResponseEntity<DiariaResponseDTO> aceitar(
-            @PathVariable Long id, 
-            @RequestParam Long idProfissional) {
-        DiariaResponseDTO atualizada = service.aceitarDiaria(id, idProfissional);
-        return ResponseEntity.ok(atualizada);
+    public ResponseEntity<DiariaResponseDTO> aceitar(@PathVariable Long id, @RequestParam Long idProfissional) {
+        return ResponseEntity.ok(service.aceitarDiaria(id, idProfissional));
     }
 
     @PatchMapping("/{id}/avaliar")
-    public ResponseEntity<DiariaResponseDTO> avaliar(
-            @PathVariable Long id, 
-            @RequestParam int nota) {
-        DiariaResponseDTO avaliada = service.avaliarDiaria(id, nota);
-        return ResponseEntity.ok(avaliada);
+    public ResponseEntity<DiariaResponseDTO> avaliar(@PathVariable Long id, @RequestParam int nota) {
+        return ResponseEntity.ok(service.avaliarDiaria(id, nota));
+    }
+
+    // --- NOVOS ENDPOINTS ---
+
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<DiariaResponseDTO> cancelar(@PathVariable Long id, @RequestParam Long idUsuario) {
+        return ResponseEntity.ok(service.cancelarDiaria(id, idUsuario));
+    }
+
+    @GetMapping("/contratante/{contratanteId}")
+    public ResponseEntity<Page<DiariaResponseDTO>> listarDoContratante(
+            @PathVariable Long contratanteId,
+            @PageableDefault(size = 10, sort = "dataServico") Pageable pageable) {
+        return ResponseEntity.ok(service.listarMinhasDiariasComoContratante(contratanteId, pageable));
+    }
+
+    @GetMapping("/profissional/{contratadoId}/pendentes")
+    public ResponseEntity<Page<DiariaResponseDTO>> listarPendentes(
+            @PathVariable Long contratadoId,
+            @PageableDefault(size = 10, sort = "dataServico") Pageable pageable) {
+        return ResponseEntity.ok(service.listarDiariasPendentesDoProfissional(contratadoId, pageable));
     }
 }

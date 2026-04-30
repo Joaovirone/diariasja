@@ -12,6 +12,7 @@ import com.diariasja.aws.dto.UsuarioResponseDTO;
 import com.diariasja.aws.dto.mappper.UsuarioMapper;
 import com.diariasja.aws.entity.Usuario;
 import com.diariasja.aws.entity.enums.TipoUsuario;
+import com.diariasja.aws.exception.ResourceNotFoundException;
 import com.diariasja.aws.repository.UsuarioRepository;
 
 @Service
@@ -42,6 +43,12 @@ public class UsuarioService {
         // Busca apenas usuários do tipo CONTRATADO e que estão ativos
         Page<Usuario> profissionais = repository.findByTipoAndAtivoTrue(TipoUsuario.CONTRATADO, pageable);
         return profissionais.map(mapper::toResponseDTO);
+    }
+
+    public UsuarioResponseDTO buscarPorEmail(String email) {
+        Usuario usuario = repository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+        return mapper.toResponseDTO(usuario);
     }
 
 }
