@@ -9,7 +9,7 @@ import com.diariasja.aws.entity.enums.TipoUsuario;
 @Entity
 @Table(name = "tb_usuarios")
 @Data
-public class Usuario {
+public class Usuario extends EntidadeAuditavel{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

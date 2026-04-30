@@ -10,7 +10,7 @@ import lombok.Data;
 @Entity
 @Table(name = "tb_diarias")
 @Data
-public class Diaria {
+public class Diaria extends EntidadeAuditavel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
