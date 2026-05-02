@@ -22,7 +22,7 @@ public record UsuarioRequestDTO(
      String senha,
 
      @NotNull(message = "Data de nascimento obrigatória")
-     LocalDate dataNascimentoDate,
+     LocalDate dataNascimento,
 
      @NotNull(message= "Escolha um Tipo de Usuário: CONTRATANTE | PRESTADOR DE SERVIÇOS")
      TipoUsuario tipo
