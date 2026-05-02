@@ -14,7 +14,7 @@ CREATE TABLE tb_usuarios (
 );
 
 -- 2. Criação da Tabela de Categorias de Serviço (Vitrine)
-CREATE TABLE tb_categorias_servico (
+CREATE TABLE tb_categoria_servico (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE,
     descricao VARCHAR(255),
@@ -41,5 +41,5 @@ CREATE TABLE tb_diarias (
     -- Chaves Estrangeiras (Relacionamentos)
     CONSTRAINT fk_diaria_contratante FOREIGN KEY (contratante_id) REFERENCES tb_usuarios(id),
     CONSTRAINT fk_diaria_contratado FOREIGN KEY (contratado_id) REFERENCES tb_usuarios(id),
-    CONSTRAINT fk_diaria_categoria FOREIGN KEY (categoria_id) REFERENCES tb_categorias_servico(id)
+    CONSTRAINT fk_diaria_categoria FOREIGN KEY (categoria_id) REFERENCES tb_categoria_servico(id)
 );
