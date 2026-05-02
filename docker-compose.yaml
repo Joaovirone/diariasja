@@ -47,6 +47,9 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - SHOW_SQL=true
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test-local
+      - AWS_SECRET_ACCESS_KEY=test-local
 
 volumes:
   mysql_data:
