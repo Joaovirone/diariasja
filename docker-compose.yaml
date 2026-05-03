@@ -27,7 +27,8 @@ services:
 
   # 3. Nossa API Spring Boot
   backend:
-    build: . 
+    build: 
+      context: ./backend
     container_name: diarias-ja-api
     ports:
       - "8080:8080"
