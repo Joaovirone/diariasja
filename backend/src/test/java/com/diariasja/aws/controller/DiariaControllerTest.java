@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,6 +33,8 @@ import com.diariasja.aws.repository.UsuarioRepository;
 import com.diariasja.aws.security.TokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.awspring.cloud.sqs.operations.SqsTemplate;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -45,6 +48,8 @@ class DiariaControllerTest {
     @Autowired private TokenService tokenService;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private ObjectMapper objectMapper;
+
+    
 
     private Usuario contratante;
     private Usuario prestador;
