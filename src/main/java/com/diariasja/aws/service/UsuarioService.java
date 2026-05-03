@@ -1,6 +1,7 @@
 package com.diariasja.aws.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,16 +28,20 @@ public class UsuarioService {
     @Autowired 
     private PasswordEncoder passwordEncoder; 
 
-     @Transactional
-        public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto) {
-            Usuario usuario = mapper.toEntity(dto);
-            
-            // CRIPTOGRAFIA NA PRÁTICA: Substitui a senha limpa pelo Hash do BCrypt
-            usuario.setSenha(passwordEncoder.encode(dto.senha()));
-            
+    @Transactional
+    public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dto) {
+        Usuario usuario = mapper.toEntity(dto);
+        
+        // CRIPTOGRAFIA NA PRÁTICA: Substitui a senha limpa pelo Hash do BCrypt
+        usuario.setSenha(passwordEncoder.encode(dto.senha()));
+        
+        try {
             Usuario usuarioSalvo = repository.save(usuario);
             return mapper.toResponseDTO(usuarioSalvo);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Email já cadastrado");
         }
+    }
 
     @Transactional(readOnly = true)
     public Page<UsuarioResponseDTO> listarProfissionaisAtivos(Pageable pageable) {

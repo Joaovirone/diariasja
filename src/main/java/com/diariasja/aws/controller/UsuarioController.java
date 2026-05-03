@@ -1,5 +1,6 @@
 package com.diariasja.aws.controller;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +34,7 @@ public class UsuarioController {
 
     @GetMapping("/profissionais")
     public ResponseEntity<Page<UsuarioResponseDTO>> listarProfissionais(
-            @PageableDefault(size = 12, sort = "nome") Pageable pageable) {
+           @ParameterObject @PageableDefault(size = 12, sort = "nome") Pageable pageable) {
         return ResponseEntity.ok(service.listarProfissionaisAtivos(pageable));
     }
 

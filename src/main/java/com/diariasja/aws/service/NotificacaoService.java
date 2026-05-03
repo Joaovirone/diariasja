@@ -1,8 +1,9 @@
 package com.diariasja.aws.service;
 
-import io.awspring.cloud.sqs.operations.SqsTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import io.awspring.cloud.sqs.operations.SqsTemplate;
 
 @Service
 public class NotificacaoService {
@@ -16,7 +17,14 @@ public class NotificacaoService {
         
         String payload = String.format("{\"email\": \"%s\", \"mensagem\": \"%s\"}", emailDestino, mensagem);
         
-        // Envia para o Amazon SQS
-        sqsTemplate.send(nomeDaFila, payload);
+        try {
+            // Envia para o Amazon SQS
+            sqsTemplate.send(nomeDaFila, payload);
+        } catch (Exception e) {
+            // Log do erro sem lançar exceção
+            System.err.println("Erro ao enviar notificação para fila SQS: " + e.getMessage());
+            e.printStackTrace();
+            // Falha de notificação não deve quebrar o fluxo principal
+        }
     }
 }

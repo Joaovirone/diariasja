@@ -1,5 +1,6 @@
 package com.diariasja.aws.controller;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +43,7 @@ public class CategoriaServicoController {
     @GetMapping
     public ResponseEntity<Page<CategoriaServicoResponseDTO>> listar(
             @RequestParam(required = false) String nome,
+            @ParameterObject
             @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
         return ResponseEntity.ok(service.listarComPaginacao(nome, pageable));
     }

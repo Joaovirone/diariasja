@@ -1,22 +1,22 @@
 package com.diariasja.aws.service;
 
-import com.diariasja.aws.dto.CategoriaServicoRequestDTO;
-import com.diariasja.aws.dto.CategoriaServicoResponseDTO;
-import com.diariasja.aws.entity.CategoriaServico;
-import com.diariasja.aws.exception.ResourceNotFoundException;
-import com.diariasja.aws.dto.mappper.*;
-import com.diariasja.aws.repository.CategoriaServicoRepository;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.cache.annotation.Cacheable;
+import com.diariasja.aws.dto.CategoriaServicoRequestDTO;
+import com.diariasja.aws.dto.CategoriaServicoResponseDTO;
+import com.diariasja.aws.dto.mappper.CategoriaServicoMapper;
+import com.diariasja.aws.entity.CategoriaServico;
+import com.diariasja.aws.exception.ResourceNotFoundException;
+import com.diariasja.aws.repository.CategoriaServicoRepository;
 
 
 @Service
@@ -29,6 +29,7 @@ public class CategoriaServicoService {
     private CategoriaServicoMapper mapper;
 
     @Transactional
+    @CacheEvict(value = "categorias", allEntries = true)
     public CategoriaServicoResponseDTO criar(CategoriaServicoRequestDTO dto) {
         // Converte o JSON de entrada para a Entidade
         CategoriaServico categoria = mapper.toEntity(dto);

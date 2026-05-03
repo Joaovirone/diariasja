@@ -13,6 +13,7 @@ import com.diariasja.aws.entity.CategoriaServico;
 import com.diariasja.aws.entity.Diaria;
 import com.diariasja.aws.entity.Usuario;
 import com.diariasja.aws.entity.enums.StatusDiaria;
+import com.diariasja.aws.entity.enums.TipoUsuario;
 import com.diariasja.aws.exception.ResourceNotFoundException;
 import com.diariasja.aws.repository.CategoriaServicoRepository;
 import com.diariasja.aws.repository.DiariaRepository;
@@ -32,6 +33,11 @@ public class DiariaService {
     // --- 1. REGRA: SOLICITAR SERVIÇO ---
     @Transactional
     public DiariaResponseDTO solicitarServico(DiariaRequestDTO dto) { 
+        // Validar que não pode contratar a si mesmo
+        if (dto.contratanteId().equals(dto.contratadoId())) {
+            throw new IllegalArgumentException("Não pode contratar a si mesmo");
+        }
+        
         Usuario contratante = usuarioRepository.findById(dto.contratanteId())
             .orElseThrow(() -> new ResourceNotFoundException("Contratante não encontrado"));
             
@@ -40,6 +46,15 @@ public class DiariaService {
             
         CategoriaServico categoria = categoriaRepository.findById(dto.categoriaId())
             .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
+
+        // Validar tipos de usuário
+        if (!TipoUsuario.CONTRATANTE.equals(contratante.getTipo())) {
+            throw new IllegalArgumentException("Usuário contratante deve ser do tipo CONTRATANTE");
+        }
+        
+        if (!TipoUsuario.CONTRATADO.equals(contratado.getTipo())) {
+            throw new IllegalArgumentException("Usuário contratado deve ser do tipo PRESTADOR");
+        }
 
         Diaria diaria = new Diaria();
         diaria.setContratante(contratante);
