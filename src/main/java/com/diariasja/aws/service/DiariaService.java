@@ -1,5 +1,6 @@
 package com.diariasja.aws.service;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -129,13 +130,13 @@ public class DiariaService {
 
     // --- 4. CONSULTAS PAGINADAS ---
     @Transactional(readOnly = true)
-    public Page<DiariaResponseDTO> listarMinhasDiariasComoContratante(Long contratanteId, Pageable pageable) {
+    public Page<DiariaResponseDTO> listarMinhasDiariasComoContratante(Long contratanteId, @ParameterObject Pageable pageable) {
         Page<Diaria> diarias = diariaRepository.findByContratanteId(contratanteId, pageable);
         return diarias.map(mapper::toResponseDTO); 
     }
 
     @Transactional(readOnly = true)
-    public Page<DiariaResponseDTO> listarDiariasPendentesDoProfissional(Long contratadoId, Pageable pageable) {
+    public Page<DiariaResponseDTO> listarDiariasPendentesDoProfissional(Long contratadoId, @ParameterObject Pageable pageable) {
         Page<Diaria> diarias = diariaRepository.findByContratadoIdAndStatus(contratadoId, StatusDiaria.PENDENTE, pageable);
         return diarias.map(mapper::toResponseDTO);
     }
