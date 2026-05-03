@@ -1,4 +1,4 @@
-package test.java.com.diariasja.aws.controller;
+package com.diariasja.aws.controller;
 
 import java.time.LocalDate;
 

@@ -1,12 +1,10 @@
-package com.diariasja.aws;
+package com.diariasja.aws.controller;
 
-import com.diariasja.aws.dto.CategoriaServicoResponseDTO;
-import com.diariasja.aws.dto.mappper.CategoriaServicoMapper;
-import com.diariasja.aws.entity.CategoriaServico;
-import com.diariasja.aws.exception.ResourceNotFoundException;
-import com.diariasja.aws.repository.CategoriaServicoRepository;
-import com.diariasja.aws.service.CategoriaServicoService;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,9 +14,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.diariasja.aws.dto.CategoriaServicoResponseDTO;
+import com.diariasja.aws.dto.mappper.CategoriaServicoMapper;
+import com.diariasja.aws.entity.CategoriaServico;
+import com.diariasja.aws.exception.ResourceNotFoundException;
+import com.diariasja.aws.repository.CategoriaServicoRepository;
+import com.diariasja.aws.service.CategoriaServicoService;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoriaServicoServiceTest {
