@@ -28,27 +28,13 @@
         >
           <h3>{{ categoria.nome }}</h3>
           <p class="text-muted">{{ categoria.descricao }}</p>
-          <div class="categoria-footer">
-            <button
-              @click="editarCategoria(categoria)"
-              class="btn btn-small"
-            >
-              Editar
-            </button>
-            <button
-              @click="deletarCategoria(categoria.id)"
-              class="btn btn-danger btn-small"
-            >
-              Deletar
-            </button>
-          </div>
         </div>
       </div>
     </div>
 
     <ModalCategoria
-      v-if="showFormCreate || categoriaEmEdicao"
-      :categoria="categoriaEmEdicao"
+      v-if="showFormCreate"
+      :categoria="null"
       @fechar="fecharModal"
       @salvar="handleSalvar"
     />
@@ -62,7 +48,6 @@ import ModalCategoria from '../components/ModalCategoria.vue'
 
 const categoriaStore = useCategoriaStore()
 const showFormCreate = ref(false)
-const categoriaEmEdicao = ref(null)
 
 const isLoading = computed(() => categoriaStore.isLoading)
 const error = computed(() => categoriaStore.error)
@@ -70,30 +55,11 @@ const categorias = computed(() => categoriaStore.categorias)
 
 const fecharModal = () => {
   showFormCreate.value = false
-  categoriaEmEdicao.value = null
-}
-
-const editarCategoria = (categoria) => {
-  categoriaEmEdicao.value = categoria
-}
-
-const deletarCategoria = async (id) => {
-  if (confirm('Tem certeza que deseja deletar esta categoria?')) {
-    try {
-      await categoriaStore.deletar(id)
-    } catch (err) {
-      console.error('Erro ao deletar categoria:', err)
-    }
-  }
 }
 
 const handleSalvar = async (dados) => {
   try {
-    if (categoriaEmEdicao.value) {
-      await categoriaStore.atualizar(categoriaEmEdicao.value.id, dados)
-    } else {
-      await categoriaStore.criar(dados)
-    }
+    await categoriaStore.criar(dados)
     fecharModal()
   } catch (err) {
     console.error('Erro ao salvar categoria:', err)

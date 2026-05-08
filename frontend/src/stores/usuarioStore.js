@@ -4,6 +4,7 @@ import { usuarioService } from '../services/usuarioService'
 
 export const useUsuarioStore = defineStore('usuario', () => {
   const usuario = ref(null)
+  const profissionais = ref([])
   const isLoading = ref(false)
   const error = ref(null)
 
@@ -21,15 +22,15 @@ export const useUsuarioStore = defineStore('usuario', () => {
     }
   }
 
-  const atualizar = async (dados) => {
+  const listarProfissionais = async (page = 0, size = 12) => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await usuarioService.atualizar(dados)
-      usuario.value = response.data
-      return usuario.value
+      const response = await usuarioService.listarProfissionais(page, size)
+      profissionais.value = response.data.content || []
+      return profissionais.value
     } catch (err) {
-      error.value = err.response?.data || 'Erro ao atualizar perfil'
+      error.value = err.response?.data || 'Erro ao listar profissionais'
       throw err
     } finally {
       isLoading.value = false
@@ -52,10 +53,11 @@ export const useUsuarioStore = defineStore('usuario', () => {
 
   return {
     usuario,
+    profissionais,
     isLoading,
     error,
     obterPerfil,
-    atualizar,
+    listarProfissionais,
     criar
   }
 })

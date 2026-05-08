@@ -13,7 +13,7 @@
         <div class="form-row">
           <div class="form-group">
             <label for="categoria">Categoria de Serviço *</label>
-            <select v-model="form.categoriaServicoId" id="categoria" required>
+            <select v-model="form.categoriaId" id="categoria" required>
               <option value="">Selecione uma categoria</option>
               <option v-for="cat in categorias" :key="cat.id" :value="cat.id">
                 {{ cat.nome }}
@@ -22,73 +22,25 @@
           </div>
 
           <div class="form-group">
-            <label for="dataServico">Data do Serviço *</label>
-            <input
-              v-model="form.dataServico"
-              type="date"
-              id="dataServico"
-              required
-            />
+            <label for="contratado">Profissional *</label>
+            <select v-model="form.contratadoId" id="contratado" required>
+              <option value="">Selecione um profissional</option>
+              <option v-for="profissional in profissionais" :key="profissional.id" :value="profissional.id">
+                {{ profissional.nome }}
+              </option>
+            </select>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="descricao">Descrição do Serviço *</label>
-          <textarea
-            v-model="form.descricao"
-            id="descricao"
-            placeholder="Descreva o serviço desejado..."
-            rows="5"
+          <label for="dataServico">Data do Serviço *</label>
+          <input
+            v-model="form.dataServico"
+            type="date"
+            id="dataServico"
+            :min="hoje"
             required
-          ></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="endereco">Endereço *</label>
-            <input
-              v-model="form.endereco"
-              type="text"
-              id="endereco"
-              placeholder="Rua, nº, bairro"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="valor">Valor da Diária (R$) *</label>
-            <input
-              v-model="form.valor"
-              type="number"
-              id="valor"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              required
-            />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="horaInicio">Hora Início *</label>
-            <input
-              v-model="form.horaInicio"
-              type="time"
-              id="horaInicio"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="horaFim">Hora Fim *</label>
-            <input
-              v-model="form.horaFim"
-              type="time"
-              id="horaFim"
-              required
-            />
-          </div>
+          />
         </div>
 
         <div class="form-actions">
@@ -109,52 +61,62 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/authStore'
 import { useDiariaStore } from '../stores/diariaStore'
 import { useCategoriaStore } from '../stores/categoriaStore'
+import { useUsuarioStore } from '../stores/usuarioStore'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const diariaStore = useDiariaStore()
 const categoriaStore = useCategoriaStore()
+const usuarioStore = useUsuarioStore()
 
 const form = reactive({
-  categoriaServicoId: '',
-  dataServico: '',
-  descricao: '',
-  endereco: '',
-  valor: '',
-  horaInicio: '',
-  horaFim: ''
+  categoriaId: '',
+  contratadoId: '',
+  dataServico: ''
 })
 
 const isLoading = ref(false)
 const error = ref(null)
-const categorias = ref([])
+const hoje = new Date().toISOString().slice(0, 10)
+
+const categorias = computed(() => categoriaStore.categorias)
+const profissionais = computed(() => usuarioStore.profissionais)
 
 const handleSubmit = async () => {
   isLoading.value = true
   error.value = null
 
   try {
+    if (!authStore.user?.id) {
+      throw new Error('Perfil do usuário não carregado')
+    }
+
     const dados = {
-      ...form,
-      categoriaServicoId: parseInt(form.categoriaServicoId),
-      valor: parseFloat(form.valor)
+      contratanteId: authStore.user.id,
+      contratadoId: Number(form.contratadoId),
+      categoriaId: Number(form.categoriaId),
+      dataServico: form.dataServico
     }
 
     await diariaStore.solicitar(dados)
     router.push('/diarias')
   } catch (err) {
-    error.value = err.response?.data?.message || 'Erro ao solicitar diária'
+    error.value = diariaStore.error || err.message || 'Erro ao solicitar diária'
   } finally {
     isLoading.value = false
   }
 }
 
 onMounted(async () => {
-  await categoriaStore.listar(0, 100)
-  categorias.value = categoriaStore.categorias
+  await Promise.all([
+    categoriaStore.listar(0, 100),
+    usuarioStore.listarProfissionais(0, 100)
+  ])
 })
 </script>
 
@@ -168,9 +130,5 @@ onMounted(async () => {
   gap: 1rem;
   margin-top: 2rem;
   justify-content: flex-end;
-}
-
-textarea {
-  resize: vertical;
 }
 </style>

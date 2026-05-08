@@ -50,7 +50,7 @@
           <select v-model="form.tipo" id="tipo" required>
             <option value="">Selecione um tipo</option>
             <option value="CONTRATANTE">Contratante</option>
-            <option value="PROFISSIONAL">Profissional</option>
+            <option value="CONTRATADO">Profissional</option>
           </select>
         </div>
 

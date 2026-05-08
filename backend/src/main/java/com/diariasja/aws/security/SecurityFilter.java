@@ -40,7 +40,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
                 // 4. Cria o objeto de Autenticação do Spring Security
                 // (O terceiro parâmetro seria para as 'Roles'/Permissões, passamos nulo neste MVP)
-                var authentication = new UsernamePasswordAuthenticationToken(usuario, null, null);
+                var authentication = new UsernamePasswordAuthenticationToken(usuario.getEmail(), null, null);
 
                 // 5. Força o login do utilizador no contexto do Spring para esta requisição específica
                 SecurityContextHolder.getContext().setAuthentication(authentication);

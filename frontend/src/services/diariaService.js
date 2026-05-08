@@ -1,39 +1,84 @@
 import api from './api'
+import {
+  addMockDiaria,
+  getMockDiarias,
+  isMockToken,
+  makeMockPage,
+  saveMockDiarias
+} from './mockData'
 
 export const diariaService = {
   solicitar(dados) {
+    if (isMockToken()) {
+      return Promise.resolve({ data: addMockDiaria(dados) })
+    }
+
     return api.post('/diarias/solicitar', dados)
   },
 
-  listar(page = 0, size = 10) {
-    return api.get('/diarias', {
-      params: { page, size }
+  listarPorContratante(contratanteId, page = 0, size = 10, sort = 'dataServico') {
+    if (isMockToken()) {
+      const diarias = getMockDiarias().filter(diaria => Number(contratanteId) === 1)
+      return Promise.resolve({ data: makeMockPage(diarias, page, size) })
+    }
+
+    return api.get(`/diarias/contratante/${contratanteId}`, {
+      params: { page, size, sort }
     })
   },
 
-  obterPorId(id) {
-    return api.get(`/diarias/${id}`)
-  },
-
   aceitar(id, idProfissional) {
+    if (isMockToken()) {
+      const diarias = getMockDiarias()
+      const index = diarias.findIndex(diaria => diaria.id === Number(id))
+      if (index > -1) {
+        diarias[index] = { ...diarias[index], status: 'CONFIRMADA' }
+        saveMockDiarias(diarias)
+        return Promise.resolve({ data: diarias[index] })
+      }
+    }
+
     return api.patch(`/diarias/${id}/aceitar`, null, {
       params: { idProfissional }
     })
   },
 
   avaliar(id, nota) {
+    if (isMockToken()) {
+      const diarias = getMockDiarias()
+      const diaria = diarias.find(item => item.id === Number(id))
+      return Promise.resolve({ data: diaria })
+    }
+
     return api.patch(`/diarias/${id}/avaliar`, null, {
       params: { nota }
     })
   },
 
-  cancelar(id) {
-    return api.patch(`/diarias/${id}/cancelar`)
+  cancelar(id, idUsuario) {
+    if (isMockToken()) {
+      const diarias = getMockDiarias()
+      const index = diarias.findIndex(diaria => diaria.id === Number(id))
+      if (index > -1) {
+        diarias[index] = { ...diarias[index], status: 'CANCELADA' }
+        saveMockDiarias(diarias)
+        return Promise.resolve({ data: diarias[index] })
+      }
+    }
+
+    return api.patch(`/diarias/${id}/cancelar`, null, {
+      params: { idUsuario }
+    })
   },
 
-  listarMintidas(page = 0, size = 10) {
-    return api.get('/diarias/minhas', {
-      params: { page, size }
+  listarPendentesProfissional(contratadoId, page = 0, size = 10, sort = 'dataServico') {
+    if (isMockToken()) {
+      const diarias = getMockDiarias().filter(diaria => diaria.status === 'PENDENTE')
+      return Promise.resolve({ data: makeMockPage(diarias, page, size) })
+    }
+
+    return api.get(`/diarias/profissional/${contratadoId}/pendentes`, {
+      params: { page, size, sort }
     })
   }
 }

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { categoriaService } from '../services/categoriaService'
+import { getApiErrorMessage } from '../services/api'
 
 export const useCategoriaStore = defineStore('categoria', () => {
   const categorias = ref([])
@@ -8,16 +9,16 @@ export const useCategoriaStore = defineStore('categoria', () => {
   const error = ref(null)
   const total = ref(0)
 
-  const listar = async (page = 0, size = 10) => {
+  const listar = async (page = 0, size = 10, nome = '') => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await categoriaService.listar(page, size)
-      categorias.value = response.data.content || response.data
-      total.value = response.data.totalElements || response.data.length
+      const response = await categoriaService.listar(page, size, nome)
+      categorias.value = response.data.content || []
+      total.value = response.data.totalElements || 0
       return categorias.value
     } catch (err) {
-      error.value = err.response?.data || 'Erro ao listar categorias'
+      error.value = getApiErrorMessage(err, 'Erro ao listar categorias')
     } finally {
       isLoading.value = false
     }
@@ -31,39 +32,7 @@ export const useCategoriaStore = defineStore('categoria', () => {
       categorias.value.unshift(response.data)
       return response.data
     } catch (err) {
-      error.value = err.response?.data || 'Erro ao criar categoria'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const atualizar = async (id, dados) => {
-    isLoading.value = true
-    error.value = null
-    try {
-      const response = await categoriaService.atualizar(id, dados)
-      const index = categorias.value.findIndex(c => c.id === id)
-      if (index > -1) {
-        categorias.value[index] = response.data
-      }
-      return response.data
-    } catch (err) {
-      error.value = err.response?.data || 'Erro ao atualizar categoria'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const deletar = async (id) => {
-    isLoading.value = true
-    error.value = null
-    try {
-      await categoriaService.deletar(id)
-      categorias.value = categorias.value.filter(c => c.id !== id)
-    } catch (err) {
-      error.value = err.response?.data || 'Erro ao deletar categoria'
+      error.value = getApiErrorMessage(err, 'Erro ao criar categoria')
       throw err
     } finally {
       isLoading.value = false
@@ -76,8 +45,6 @@ export const useCategoriaStore = defineStore('categoria', () => {
     error,
     total,
     listar,
-    criar,
-    atualizar,
-    deletar
+    criar
   }
 })

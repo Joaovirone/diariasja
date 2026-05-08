@@ -9,7 +9,18 @@ const api = axios.create({
   }
 })
 
-// Interceptor para adicionar o token JWT nas requisições
+export const getApiErrorMessage = (error, fallback = 'Erro ao processar a solicitação') => {
+  const data = error.response?.data
+
+  if (typeof data === 'string') return data
+  if (data?.mensagem) return data.mensagem
+  if (data?.erro) return data.erro
+  if (data?.message) return data.message
+  if (data?.campos) return Object.values(data.campos).join(', ')
+
+  return fallback
+}
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -18,17 +29,15 @@ api.interceptors.request.use(
     }
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
-// Interceptor para tratamento de erros
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && window.location.pathname !== '/login') {
       localStorage.removeItem('token')
+      localStorage.removeItem('user')
       window.location.href = '/login'
     }
     return Promise.reject(error)

@@ -24,17 +24,6 @@
               ★
             </button>
           </div>
-          <p class="text-muted">Clique nas estrelas para avaliar</p>
-        </div>
-
-        <div class="form-group">
-          <label for="comentario">Comentário (opcional)</label>
-          <textarea
-            v-model="comentario"
-            id="comentario"
-            placeholder="Deixe um comentário sobre o serviço..."
-            rows="3"
-          ></textarea>
         </div>
 
         <div class="modal-footer">
@@ -63,7 +52,6 @@ defineProps({
 const emit = defineEmits(['fechar', 'avaliar'])
 
 const nota = ref(0)
-const comentario = ref('')
 const isLoading = ref(false)
 const error = ref(null)
 
@@ -81,10 +69,7 @@ const handleAvaliar = async () => {
   error.value = null
 
   try {
-    emit('avaliar', {
-      nota: nota.value,
-      comentario: comentario.value
-    })
+    emit('avaliar', nota.value)
   } catch (err) {
     error.value = 'Erro ao avaliar diária'
   } finally {
@@ -179,10 +164,5 @@ const handleAvaliar = async () => {
 .star:hover,
 .star.active {
   color: #ffc107;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 80px;
 }
 </style>

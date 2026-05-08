@@ -19,8 +19,8 @@
       <div class="filters">
         <select v-model="filtroStatus" class="filter-select">
           <option value="">Todos os Status</option>
-          <option value="ATIVA">Ativa</option>
-          <option value="ACEITA">Aceita</option>
+          <option value="PENDENTE">Pendente</option>
+          <option value="CONFIRMADA">Confirmada</option>
           <option value="CONCLUIDA">Concluída</option>
           <option value="CANCELADA">Cancelada</option>
         </select>
@@ -53,23 +53,20 @@
             </div>
             <div class="info-item">
               <span class="label">Contratado:</span>
-              <span>{{ diaria.nomeContratado || 'Aguardando aceite' }}</span>
+              <span>{{ diaria.nomeContratado }}</span>
             </div>
           </div>
 
           <div class="diaria-footer">
-            <button class="btn btn-small" @click="verDetalhes(diaria.id)">
-              Ver Detalhes
-            </button>
             <button
-              v-if="diaria.status === 'ACEITA'"
+              v-if="diaria.status === 'CONCLUIDA'"
               class="btn btn-success btn-small"
               @click="avaliarDiaria(diaria.id)"
             >
               Avaliar
             </button>
             <button
-              v-if="diaria.status === 'ATIVA'"
+              v-if="diaria.status !== 'CONCLUIDA' && diaria.status !== 'CANCELADA'"
               class="btn btn-danger btn-small"
               @click="cancelarDiaria(diaria.id)"
             >
@@ -91,11 +88,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '../stores/authStore'
 import { useDiariaStore } from '../stores/diariaStore'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import ModalAvaliacao from '../components/ModalAvaliacao.vue'
 
+const authStore = useAuthStore()
 const diariaStore = useDiariaStore()
 const filtroStatus = ref('')
 const showModalAvaliacao = ref(false)
@@ -105,48 +104,35 @@ const isLoading = computed(() => diariaStore.isLoading)
 const error = computed(() => diariaStore.error)
 
 const diariasFiltradas = computed(() => {
-  if (!filtroStatus.value) {
-    return diariaStore.minhasDiarias
-  }
-  return diariaStore.minhasDiarias.filter(d => d.status === filtroStatus.value)
+  if (!filtroStatus.value) return diariaStore.diarias
+  return diariaStore.diarias.filter(d => d.status === filtroStatus.value)
 })
 
-const formatDate = (date) => {
-  return format(new Date(date), 'dd MMM yyyy', { locale: ptBR })
-}
+const formatDate = (date) => format(new Date(date), 'dd MMM yyyy', { locale: ptBR })
 
 const formatStatus = (status) => {
   const statusMap = {
-    'ATIVA': 'Ativa',
-    'ACEITA': 'Aceita',
-    'CONCLUIDA': 'Concluída',
-    'CANCELADA': 'Cancelada'
+    PENDENTE: 'Pendente',
+    CONFIRMADA: 'Confirmada',
+    CONCLUIDA: 'Concluída',
+    CANCELADA: 'Cancelada'
   }
   return statusMap[status] || status
 }
 
 const getStatusClass = (status) => {
   const classMap = {
-    'ATIVA': 'info',
-    'ACEITA': 'success',
-    'CONCLUIDA': 'success',
-    'CANCELADA': 'danger'
+    PENDENTE: 'info',
+    CONFIRMADA: 'success',
+    CONCLUIDA: 'success',
+    CANCELADA: 'danger'
   }
   return classMap[status] || 'info'
 }
 
-const verDetalhes = (id) => {
-  // Implementar navegação para detalhes
-  console.log('Ver detalhes:', id)
-}
-
 const cancelarDiaria = async (id) => {
   if (confirm('Tem certeza que deseja cancelar esta diária?')) {
-    try {
-      await diariaStore.cancelar(id)
-    } catch (err) {
-      console.error('Erro ao cancelar diária:', err)
-    }
+    await diariaStore.cancelar(id, authStore.user.id)
   }
 }
 
@@ -156,16 +142,12 @@ const avaliarDiaria = (id) => {
 }
 
 const handleAvaliar = async (nota) => {
-  try {
-    await diariaStore.avaliar(diariaEmAvaliacao.value, nota)
-    showModalAvaliacao.value = false
-  } catch (err) {
-    console.error('Erro ao avaliar diária:', err)
-  }
+  await diariaStore.avaliar(diariaEmAvaliacao.value, nota)
+  showModalAvaliacao.value = false
 }
 
 onMounted(async () => {
-  await diariaStore.listarMinhas(0, 20)
+  await diariaStore.listarPorContratante(authStore.user.id, 0, 20)
 })
 </script>
 
