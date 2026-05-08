@@ -50,5 +50,24 @@ services:
       - AWS_ACCESS_KEY_ID=test-local
       - AWS_SECRET_ACCESS_KEY=test-local
 
+  # 4. Frontend Vue.js
+  frontend:
+    build:
+      context: ./frontend
+    container_name: diarias-ja-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:8080
+      - VITE_APP_NAME=Diárias JÁ
+    networks:
+      - diarias-network
+
+networks:
+  diarias-network:
+    driver: bridge
+
 volumes:
   mysql_data:
