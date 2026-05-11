@@ -3,7 +3,7 @@ export const MOCK_TOKEN_PREFIX = 'mock-token'
 export const MOCK_USERS = [
   {
     id: 1,
-    nome: 'Contratante',
+    nome: 'João Vitor',
     email: 'contratante@gmail.com',
     senha: '123456',
     dataNascimento: '1995-01-01',
@@ -12,12 +12,63 @@ export const MOCK_USERS = [
   },
   {
     id: 2,
-    nome: 'Autonomo',
+    nome: 'Pedro Henrique',
     email: 'autonomo@gmail.com',
     senha: '123456',
     dataNascimento: '1990-01-01',
     tipo: 'CONTRATADO',
-    ativo: true
+    ativo: true,
+    categoriaPrincipal: 'Faxina',
+    valorBase: 180,
+    avaliacao: 4.9,
+    bairro: 'Centro',
+    descricao: 'Limpeza residencial completa, organização leve e materiais básicos inclusos.',
+    fotoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 3,
+    nome: 'Ana Clara',
+    email: 'ana.clara@gmail.com',
+    senha: '123456',
+    dataNascimento: '1988-04-12',
+    tipo: 'CONTRATADO',
+    ativo: true,
+    categoriaPrincipal: 'Jardinagem',
+    valorBase: 220,
+    avaliacao: 4.8,
+    bairro: 'Jardim América',
+    descricao: 'Poda, limpeza de jardim, retirada de folhas e manutenção de vasos.',
+    fotoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 4,
+    nome: 'Marcos Lima',
+    email: 'marcos.lima@gmail.com',
+    senha: '123456',
+    dataNascimento: '1985-07-22',
+    tipo: 'CONTRATADO',
+    ativo: true,
+    categoriaPrincipal: 'Manutenção',
+    valorBase: 260,
+    avaliacao: 4.7,
+    bairro: 'Vila Nova',
+    descricao: 'Pequenos reparos, troca de tomadas, torneiras, ajustes e instalações simples.',
+    fotoUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80'
+  },
+  {
+    id: 5,
+    nome: 'Beatriz Santos',
+    email: 'beatriz.santos@gmail.com',
+    senha: '123456',
+    dataNascimento: '1992-11-03',
+    tipo: 'CONTRATADO',
+    ativo: true,
+    categoriaPrincipal: 'Faxina',
+    valorBase: 200,
+    avaliacao: 5,
+    bairro: 'Boa Vista',
+    descricao: 'Faxina detalhada para casas e apartamentos, com foco em cozinha e banheiros.',
+    fotoUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80'
   }
 ]
 
@@ -29,6 +80,33 @@ export const MOCK_CATEGORIAS = [
 
 const STORAGE_KEY = 'mockDiarias'
 
+const DEFAULT_MOCK_DIARIAS = [
+  {
+    id: 101,
+    nomeContratante: 'João Vitor',
+    nomeContratado: 'Pedro Henrique',
+    contratanteId: 1,
+    contratadoId: 2,
+    categoriaId: 1,
+    nomeCategoria: 'Faxina',
+    dataServico: new Date(Date.now() + 86400000 * 2).toISOString().slice(0, 10),
+    status: 'PENDENTE',
+    valorServico: 180
+  },
+  {
+    id: 102,
+    nomeContratante: 'João Vitor',
+    nomeContratado: 'Pedro Henrique',
+    contratanteId: 1,
+    contratadoId: 2,
+    categoriaId: 3,
+    nomeCategoria: 'Manutenção',
+    dataServico: new Date(Date.now() + 86400000 * 5).toISOString().slice(0, 10),
+    status: 'CONFIRMADA',
+    valorServico: 240
+  }
+]
+
 export const getMockUserByCredentials = (email, senha) => {
   return MOCK_USERS.find(user => user.email === email && user.senha === senha)
 }
@@ -38,7 +116,12 @@ export const getMockCurrentUser = () => {
   if (!savedUser) return null
 
   try {
-    return JSON.parse(savedUser)
+    const parsedUser = JSON.parse(savedUser)
+    const freshMock = MOCK_USERS.find(user => user.id === parsedUser.id)
+    if (!freshMock) return parsedUser
+    const { senha, ...user } = freshMock
+    localStorage.setItem('user', JSON.stringify(user))
+    return user
   } catch {
     return null
   }
@@ -61,12 +144,21 @@ export const makeMockPage = (content, page = 0, size = 10) => ({
 
 export const getMockDiarias = () => {
   const saved = localStorage.getItem(STORAGE_KEY)
-  if (!saved) return []
+  if (!saved) {
+    saveMockDiarias(DEFAULT_MOCK_DIARIAS)
+    return DEFAULT_MOCK_DIARIAS
+  }
 
   try {
-    return JSON.parse(saved)
+    const parsedDiarias = JSON.parse(saved)
+    if (Array.isArray(parsedDiarias) && parsedDiarias.length === 0) {
+      saveMockDiarias(DEFAULT_MOCK_DIARIAS)
+      return DEFAULT_MOCK_DIARIAS
+    }
+    return parsedDiarias
   } catch {
-    return []
+    saveMockDiarias(DEFAULT_MOCK_DIARIAS)
+    return DEFAULT_MOCK_DIARIAS
   }
 }
 
@@ -83,10 +175,14 @@ export const addMockDiaria = (dados) => {
   const diaria = {
     id: Date.now(),
     nomeContratante: contratante?.nome || 'Contratante',
-    nomeContratado: contratado?.nome || 'Autonomo',
+    nomeContratado: contratado?.nome || 'Autônomo',
+    contratanteId: dados.contratanteId,
+    contratadoId: dados.contratadoId,
+    categoriaId: dados.categoriaId,
     nomeCategoria: categoria?.nome || 'Categoria',
     dataServico: dados.dataServico,
-    status: 'PENDENTE'
+    status: 'PENDENTE',
+    valorServico: dados.valorServico || 180
   }
 
   saveMockDiarias([diaria, ...diarias])

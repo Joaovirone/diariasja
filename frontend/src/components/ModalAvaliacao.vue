@@ -2,7 +2,7 @@
   <div class="modal-overlay" @click="fechar">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>Avaliar Diária</h2>
+        <h2>Avaliar diária</h2>
         <button @click="fechar" class="close-btn">&times;</button>
       </div>
 
@@ -31,7 +31,7 @@
             Cancelar
           </button>
           <button type="submit" :disabled="isLoading || nota === 0" class="btn btn-primary">
-            {{ isLoading ? 'Avaliando...' : 'Confirmar Avaliação' }}
+            {{ isLoading ? 'Avaliando...' : 'Confirmar avaliação' }}
           </button>
         </div>
       </form>

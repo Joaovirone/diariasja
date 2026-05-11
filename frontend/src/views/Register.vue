@@ -1,95 +1,61 @@
 <template>
-  <div class="register-container">
-    <div class="register-card">
-      <h1>Criar Conta</h1>
-      <p class="subtitle">Junte-se ao Diárias JÁ</p>
+  <div class="auth-page">
+    <section class="auth-panel">
+      <h1>Criar conta</h1>
+      <p>Escolha seu perfil e complete os dados para entrar no Diárias Já.</p>
 
       <form @submit.prevent="handleRegister">
-        <div v-if="error" class="alert alert-error">
-          <span>{{ error }}</span>
-        </div>
-
-        <div v-if="success" class="alert alert-success">
-          <span>Conta criada com sucesso! Redirecionando...</span>
-        </div>
+        <div v-if="error" class="alert alert-error">{{ error }}</div>
+        <div v-if="success" class="alert alert-success">Conta criada com sucesso. Redirecionando...</div>
 
         <div class="form-group">
-          <label for="nome">Nome Completo</label>
-          <input
-            v-model="form.nome"
-            type="text"
-            id="nome"
-            placeholder="Seu nome completo"
-            required
-          />
+          <label for="nome">Nome completo</label>
+          <input v-model="form.nome" type="text" id="nome" placeholder="Seu nome completo" required />
         </div>
 
         <div class="form-group">
           <label for="email">E-mail</label>
-          <input
-            v-model="form.email"
-            type="email"
-            id="email"
-            placeholder="seu@email.com"
-            required
-          />
+          <input v-model="form.email" type="email" id="email" placeholder="seu@email.com" required />
         </div>
 
-        <div class="form-group">
-          <label for="dataNascimento">Data de Nascimento</label>
-          <input
-            v-model="form.dataNascimento"
-            type="date"
-            id="dataNascimento"
-            required
-          />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dataNascimento">Nascimento</label>
+            <input v-model="form.dataNascimento" type="date" id="dataNascimento" required />
+          </div>
+
+          <div class="form-group">
+            <label for="tipo">Perfil</label>
+            <select v-model="form.tipo" id="tipo" required>
+              <option value="">Selecione</option>
+              <option value="CONTRATANTE">Contratante</option>
+              <option value="CONTRATADO">Autônomo</option>
+            </select>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="tipo">Tipo de Usuário</label>
-          <select v-model="form.tipo" id="tipo" required>
-            <option value="">Selecione um tipo</option>
-            <option value="CONTRATANTE">Contratante</option>
-            <option value="CONTRATADO">Profissional</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="senha">Senha</label>
+            <input v-model="form.senha" type="password" id="senha" placeholder="Mínimo 6 caracteres" required />
+          </div>
+
+          <div class="form-group">
+            <label for="confirmaSenha">Confirmar senha</label>
+            <input v-model="form.confirmaSenha" type="password" id="confirmaSenha" placeholder="Repita a senha" required />
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="senha">Senha</label>
-          <input
-            v-model="form.senha"
-            type="password"
-            id="senha"
-            placeholder="••••••••"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="confirmaSenha">Confirmar Senha</label>
-          <input
-            v-model="form.confirmaSenha"
-            type="password"
-            id="confirmaSenha"
-            placeholder="••••••••"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          :disabled="isLoading"
-          class="btn btn-primary btn-full"
-        >
-          {{ isLoading ? 'Criando conta...' : 'Criar Conta' }}
+        <button type="submit" :disabled="isLoading" class="btn btn-primary btn-full">
+          {{ isLoading ? 'Criando conta...' : 'Criar conta' }}
         </button>
       </form>
 
-      <p class="register-footer">
+      <p class="auth-footer">
         Já tem conta?
-        <router-link to="/login">Faça login aqui</router-link>
+        <router-link to="/login">Entrar</router-link>
       </p>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -124,20 +90,18 @@ const handleRegister = async () => {
   error.value = null
 
   try {
-    const dados = {
+    await usuarioStore.criar({
       nome: form.nome,
       email: form.email,
       dataNascimento: form.dataNascimento,
       tipo: form.tipo,
       senha: form.senha
-    }
-
-    await usuarioStore.criar(dados)
+    })
     success.value = true
 
     setTimeout(() => {
       router.push('/login')
-    }, 2000)
+    }, 1600)
   } catch (err) {
     error.value = usuarioStore.error || 'Erro ao criar conta'
   } finally {
@@ -147,66 +111,45 @@ const handleRegister = async () => {
 </script>
 
 <style scoped>
-.register-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.auth-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background:
+    radial-gradient(circle at 78% 18%, rgba(249, 115, 22, 0.18), transparent 28%),
+    linear-gradient(135deg, #101828, #0f766e);
 }
 
-.register-card {
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  padding: 3rem 2rem;
-  width: 100%;
-  max-width: 450px;
+.auth-panel {
+  width: min(720px, 100%);
+  min-height: 100vh;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 28px 80px rgba(16, 24, 40, 0.28);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-h1 {
-  text-align: center;
-  color: #667eea;
-  margin-bottom: 0.5rem;
-  font-size: 1.75rem;
-}
-
-.subtitle {
-  text-align: center;
-  color: #666;
-  margin-bottom: 2rem;
-  font-size: 0.9rem;
+.auth-panel p {
+  color: var(--muted);
+  margin-bottom: 1.25rem;
 }
 
 .btn-full {
   width: 100%;
 }
 
-.register-footer {
+.auth-footer {
+  margin-top: 1.25rem;
   text-align: center;
-  margin-top: 1.5rem;
-  font-size: 0.9rem;
-  color: #666;
 }
 
-.register-footer a {
-  color: #667eea;
-  font-weight: 600;
+.auth-footer a {
+  color: var(--primary);
+  font-weight: 800;
   text-decoration: none;
-}
-
-.register-footer a:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 480px) {
-  .register-card {
-    padding: 2rem 1.5rem;
-  }
-
-  h1 {
-    font-size: 1.5rem;
-  }
 }
 </style>

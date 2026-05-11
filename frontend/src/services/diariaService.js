@@ -18,7 +18,7 @@ export const diariaService = {
 
   listarPorContratante(contratanteId, page = 0, size = 10, sort = 'dataServico') {
     if (isMockToken()) {
-      const diarias = getMockDiarias().filter(diaria => Number(contratanteId) === 1)
+      const diarias = getMockDiarias().filter(diaria => Number(diaria.contratanteId || 1) === Number(contratanteId))
       return Promise.resolve({ data: makeMockPage(diarias, page, size) })
     }
 
@@ -32,7 +32,7 @@ export const diariaService = {
       const diarias = getMockDiarias()
       const index = diarias.findIndex(diaria => diaria.id === Number(id))
       if (index > -1) {
-        diarias[index] = { ...diarias[index], status: 'CONFIRMADA' }
+        diarias[index] = { ...diarias[index], status: 'CONFIRMADA', contratadoId: idProfissional }
         saveMockDiarias(diarias)
         return Promise.resolve({ data: diarias[index] })
       }
@@ -73,7 +73,10 @@ export const diariaService = {
 
   listarPendentesProfissional(contratadoId, page = 0, size = 10, sort = 'dataServico') {
     if (isMockToken()) {
-      const diarias = getMockDiarias().filter(diaria => diaria.status === 'PENDENTE')
+      const diarias = getMockDiarias().filter(diaria => {
+        const belongsToProfessional = !diaria.contratadoId || Number(diaria.contratadoId) === Number(contratadoId)
+        return belongsToProfessional && diaria.status !== 'CANCELADA'
+      })
       return Promise.resolve({ data: makeMockPage(diarias, page, size) })
     }
 

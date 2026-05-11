@@ -10,6 +10,8 @@ const Diarias = () => import('../views/Diarias.vue')
 const CriarDiaria = () => import('../views/CriarDiaria.vue')
 const Categorias = () => import('../views/Categorias.vue')
 const Perfil = () => import('../views/Perfil.vue')
+const Chat = () => import('../views/Chat.vue')
+const Notificacoes = () => import('../views/Notificacoes.vue')
 
 const routes = [
   {
@@ -65,6 +67,18 @@ const routes = [
     path: '/perfil',
     name: 'Perfil',
     component: Perfil,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/chat',
+    name: 'Chat',
+    component: Chat,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/notificacoes',
+    name: 'Notificacoes',
+    component: Notificacoes,
     meta: { requiresAuth: true }
   },
   {

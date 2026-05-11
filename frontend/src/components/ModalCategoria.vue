@@ -2,7 +2,7 @@
   <div class="modal-overlay" @click="fechar">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>{{ categoria ? 'Editar Categoria' : 'Nova Categoria' }}</h2>
+        <h2>{{ categoria ? 'Editar categoria' : 'Nova categoria' }}</h2>
         <button @click="fechar" class="close-btn">&times;</button>
       </div>
 
@@ -12,7 +12,7 @@
         </div>
 
         <div class="form-group">
-          <label for="nome">Nome da Categoria *</label>
+          <label for="nome">Nome da categoria *</label>
           <input
             v-model="form.nome"
             type="text"

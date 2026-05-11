@@ -1,21 +1,21 @@
 <template>
   <div class="container">
     <div class="page-header">
-      <h1>Meus Dados</h1>
+      <h1>Meus dados</h1>
     </div>
 
     <div class="grid grid-2">
       <div class="card">
         <div class="card-header">
-          <h2>Dados da Conta</h2>
+          <h2>Dados da conta</h2>
         </div>
         <div class="data-display">
           <div class="data-item">
-            <span class="label">Tipo de Usuário:</span>
+            <span class="label">Tipo de usuário:</span>
             <span class="value">{{ formatTipo(usuario?.tipo) }}</span>
           </div>
           <div class="data-item">
-            <span class="label">Diárias Carregadas:</span>
+            <span class="label">Diárias carregadas:</span>
             <span class="value">{{ historicoRecente.length }}</span>
           </div>
           <div class="data-item">
@@ -28,7 +28,7 @@
 
     <div class="card mt-4">
       <div class="card-header">
-        <h2>Histórico de Diárias</h2>
+        <h2>Histórico de diárias</h2>
       </div>
       <table>
         <thead>
