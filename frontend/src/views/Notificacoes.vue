@@ -14,7 +14,7 @@
       <div class="notification-summary">
         <strong>{{ unreadCount }}</strong>
         <span>não lidas</span>
-        <p>{{ isContratante ? 'Acompanhe respostas de profissionais e status das diárias.' : 'Veja oportunidades novas e mensagens de contratantes.' }}</p>
+        <p>{{ isContratante ? 'Acompanhe respostas de prestadores de serviço e status das diárias.' : 'Veja oportunidades novas e mensagens de contratantes.' }}</p>
       </div>
 
       <div class="notification-list" v-if="activeNotifications.length">
@@ -90,7 +90,7 @@ onMounted(() => {
 .notification-summary,
 .notification-card {
   border: 1px solid var(--border-color);
-  border-radius: 20px;
+  border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--shadow);
 }
@@ -98,7 +98,7 @@ onMounted(() => {
 .notification-summary {
   min-height: 100%;
   padding: 1.5rem;
-  background: linear-gradient(140deg, #101828, #0e7c72);
+  background: linear-gradient(140deg, #06364a, #168a58);
   color: white;
 }
 
@@ -144,8 +144,8 @@ onMounted(() => {
 }
 
 .notification-card.unread {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.08), var(--shadow);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(7, 95, 122, 0.08), var(--shadow);
 }
 
 .read-card {
@@ -156,7 +156,7 @@ onMounted(() => {
 .empty-notifications {
   padding: 2rem;
   border: 1px solid var(--border-color);
-  border-radius: 20px;
+  border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--shadow);
   text-align: center;
@@ -172,9 +172,9 @@ onMounted(() => {
   height: 54px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
-  background: #ccfbf1;
-  color: #115e59;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
   font-size: 0.78rem;
   font-weight: 900;
 }

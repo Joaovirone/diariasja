@@ -25,7 +25,7 @@ public class DadosIniciaisConfig {
                     usuarioRepository,
                     passwordEncoder,
                     "Contratante",
-                    "contratante@gmail.com",
+                    "joao@gmail.com",
                     TipoUsuario.CONTRATANTE,
                     LocalDate.of(1995, 1, 1)
             );
@@ -33,8 +33,8 @@ public class DadosIniciaisConfig {
             criarOuAtualizarUsuario(
                     usuarioRepository,
                     passwordEncoder,
-                    "Autonomo",
-                    "autonomo@gmail.com",
+                    "Prestador de Serviço",
+                    "pedro@gmail.com",
                     TipoUsuario.CONTRATADO,
                     LocalDate.of(1990, 1, 1)
             );

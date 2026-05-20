@@ -1,4 +1,4 @@
--- 1. Criação da Tabela de Usuários (Contratantes e Profissionais)
+-- 1. Criação da Tabela de Usuários (Contratantes e Prestadores de Serviço)
 CREATE TABLE tb_usuarios (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,

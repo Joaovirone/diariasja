@@ -12,7 +12,7 @@
       <nav class="nav-list" aria-label="Navegação principal">
         <router-link to="/dashboard">Dashboard</router-link>
         <router-link to="/diarias">{{ isContratante ? 'Minhas diárias' : 'Serviços' }}</router-link>
-        <router-link v-if="isContratante" to="/diarias/criar">Solicitar diária</router-link>
+        <router-link v-if="isContratante" to="/diarias/criar">Buscar prestadores</router-link>
         <router-link to="/chat">Chat</router-link>
         <router-link to="/notificacoes" class="nav-with-badge">
           Notificações
@@ -56,7 +56,7 @@ const notificacaoStore = useNotificacaoStore()
 
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const isContratante = computed(() => authStore.user?.tipo === 'CONTRATANTE')
-const roleLabel = computed(() => isContratante.value ? 'Contratante' : 'Autônomo')
+const roleLabel = computed(() => isContratante.value ? 'Contratante' : 'Prestador de serviço')
 const userName = computed(() => authStore.user?.nome || 'Usuário')
 const unreadCount = computed(() => notificacaoStore.unreadCount)
 
@@ -91,7 +91,7 @@ const logout = () => {
   height: 100vh;
   padding: 1.15rem;
   background:
-    linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(10, 35, 34, 0.98));
+    linear-gradient(180deg, rgba(6, 54, 74, 0.98), rgba(10, 66, 56, 0.98));
   color: white;
   display: flex;
   flex-direction: column;
@@ -114,11 +114,11 @@ const logout = () => {
   height: 48px;
   display: grid;
   place-items: center;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #25d0bd, #f9b572);
-  color: #05231f;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #168a58, #f2b705);
+  color: #082f36;
   font-weight: 950;
-  box-shadow: 0 14px 32px rgba(37, 208, 189, 0.18);
+  box-shadow: 0 14px 32px rgba(22, 138, 88, 0.2);
 }
 
 .brand strong,
@@ -165,7 +165,7 @@ const logout = () => {
   display: inline-grid;
   place-items: center;
   border-radius: 999px;
-  background: #f97316;
+  background: var(--sergipe-yellow);
   color: white;
   font-size: 0.78rem;
   font-weight: 900;
@@ -175,7 +175,7 @@ const logout = () => {
 .nav-list a.router-link-active {
   background: rgba(255, 255, 255, 0.1);
   color: white;
-  box-shadow: inset 3px 0 0 #25d0bd;
+  box-shadow: inset 3px 0 0 var(--sergipe-yellow);
 }
 
 .logout-button {
@@ -233,7 +233,7 @@ const logout = () => {
 .chat-shortcut {
   padding: 0.55rem 0.8rem;
   border-radius: 999px;
-  background: rgba(14, 124, 114, 0.08);
+  background: rgba(7, 95, 122, 0.08);
 }
 
 .notification-shortcut {

@@ -1,5 +1,5 @@
 import api from './api'
-import { getMockCurrentUser, isMockToken, makeMockPage, MOCK_USERS } from './mockData'
+import { createRegisteredMockUser, getMockCurrentUser, getRegisteredMockUsers, isMockToken, makeMockPage, MOCK_USERS } from './mockData'
 
 export const usuarioService = {
   obterPerfil() {
@@ -11,16 +11,22 @@ export const usuarioService = {
   },
 
   criarConta(dados) {
-    return api.post('/usuarios/cadastrar', dados)
+    return api.post('/usuarios/cadastrar', dados).catch((err) => {
+      if (!err.response) {
+        return Promise.resolve({ data: createRegisteredMockUser(dados) })
+      }
+
+      throw err
+    })
   },
 
-  listarProfissionais(page = 0, size = 12, sort = 'nome') {
+  listarPrestadores(page = 0, size = 12, sort = 'nome') {
     if (isMockToken()) {
-      const profissionais = MOCK_USERS
+      const prestadores = [...MOCK_USERS, ...getRegisteredMockUsers()]
         .filter(user => user.tipo === 'CONTRATADO' && user.ativo)
         .map(({ senha, ...user }) => user)
 
-      return Promise.resolve({ data: makeMockPage(profissionais, page, size) })
+      return Promise.resolve({ data: makeMockPage(prestadores, page, size) })
     }
 
     return api.get('/usuarios/profissionais', {

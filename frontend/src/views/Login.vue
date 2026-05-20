@@ -1,9 +1,9 @@
 <template>
   <main class="login-page">
     <aside class="side-note" aria-label="Resumo do produto">
-      <span>Serviços sob demanda</span>
+      <span>Sergipe em movimento</span>
       <h2>Conecte quem precisa de ajuda com quem sabe resolver.</h2>
-      <p>Perfis, valores, agenda, notificações e chat em uma experiência simples para o dia a dia.</p>
+      <p>Prestadores de serviço, valores, agenda, notificações e chat em uma experiência simples para o dia a dia.</p>
     </aside>
 
     <section class="login-card" aria-labelledby="loginTitle">
@@ -15,7 +15,7 @@
       <div class="headline">
         <span class="eyebrow">Acesso rápido</span>
         <h1 id="loginTitle">Entre na sua conta</h1>
-        <p>Organize diárias, converse pelo chat e acompanhe oportunidades em poucos cliques.</p>
+        <p>Organize diárias, converse pelo chat e acompanhe contratações em poucos cliques.</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="login-form">
@@ -23,7 +23,7 @@
 
         <div class="form-group">
           <label for="email">E-mail</label>
-          <input v-model="form.email" type="email" id="email" placeholder="contratante@gmail.com" required />
+          <input v-model="form.email" type="email" id="email" placeholder="joao@gmail.com" required />
         </div>
 
         <div class="form-group">
@@ -92,9 +92,9 @@ const handleLogin = async () => {
   min-height: 100dvh;
   padding: clamp(1.25rem, 3vw, 3rem);
   background:
-    radial-gradient(circle at 14% 18%, rgba(249, 181, 114, 0.26), transparent 18rem),
-    radial-gradient(circle at 82% 16%, rgba(37, 208, 189, 0.24), transparent 22rem),
-    linear-gradient(135deg, #061817 0%, #0d2f30 44%, #101828 100%);
+    radial-gradient(circle at 14% 18%, rgba(22, 138, 88, 0.26), transparent 18rem),
+    radial-gradient(circle at 82% 16%, rgba(242, 183, 5, 0.16), transparent 22rem),
+    linear-gradient(135deg, #06364a 0%, #0b5967 46%, #10202b 100%);
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(380px, 480px);
   align-items: center;
@@ -108,7 +108,7 @@ const handleLogin = async () => {
   width: 100%;
   padding: clamp(1.75rem, 3vw, 2.5rem);
   border: 1px solid rgba(255, 255, 255, 0.92);
-  border-radius: 30px;
+  border-radius: 24px;
   background: #ffffff;
   box-shadow: 0 34px 90px rgba(2, 8, 23, 0.34);
 }
@@ -128,8 +128,8 @@ const handleLogin = async () => {
   border-radius: 15px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #25d0bd, #f9b572);
-  color: #05231f;
+  background: linear-gradient(135deg, var(--sergipe-green), var(--sergipe-yellow));
+  color: #082f36;
   font-weight: 950;
 }
 
@@ -142,8 +142,8 @@ const handleLogin = async () => {
   margin-bottom: 0.85rem;
   padding: 0.42rem 0.7rem;
   border-radius: 999px;
-  background: #d9fbf5;
-  color: #0f766e;
+  background: var(--primary-soft);
+  color: var(--primary);
   font-weight: 950;
   text-transform: uppercase;
   font-size: 0.76rem;
@@ -181,7 +181,7 @@ const handleLogin = async () => {
 }
 
 .auth-footer a {
-  color: #0e7c72;
+  color: var(--primary);
   font-weight: 900;
   text-decoration: none;
 }
@@ -199,7 +199,7 @@ const handleLogin = async () => {
   padding: 0.5rem 0.75rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
-  color: #d1faf4;
+  color: #dff7e9;
   font-size: 0.78rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -215,7 +215,7 @@ const handleLogin = async () => {
 .side-note p {
   max-width: 640px;
   margin-top: 1.2rem;
-  color: #e4ecea;
+  color: #e3eeee;
   font-size: 1.12rem;
   font-weight: 500;
 }

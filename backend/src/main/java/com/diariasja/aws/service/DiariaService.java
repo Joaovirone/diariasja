@@ -54,7 +54,7 @@ public class DiariaService {
         }
         
         if (!TipoUsuario.CONTRATADO.equals(contratado.getTipo())) {
-            throw new IllegalArgumentException("Usuário contratado deve ser do tipo PRESTADOR");
+            throw new IllegalArgumentException("Usuário contratado deve ser do tipo PRESTADOR DE SERVIÇO");
         }
 
         Diaria diaria = new Diaria();
@@ -70,12 +70,12 @@ public class DiariaService {
 
     // --- 2. REGRA: ACEITAR DIÁRIA (Com Fila AWS) ---
     @Transactional
-    public DiariaResponseDTO aceitarDiaria(Long idDiaria, Long idProfissional) {
+    public DiariaResponseDTO aceitarDiaria(Long idDiaria, Long idPrestador) {
         Diaria diaria = diariaRepository.findById(idDiaria)
             .orElseThrow(() -> new ResourceNotFoundException("Diária não encontrada"));
 
-        if (!diaria.getContratado().getId().equals(idProfissional)) {
-            throw new IllegalArgumentException("Apenas o profissional escalado pode aceitar.");
+        if (!diaria.getContratado().getId().equals(idPrestador)) {
+            throw new IllegalArgumentException("Apenas o prestador de serviço escalado pode aceitar.");
         }
         if (diaria.getStatus() != StatusDiaria.PENDENTE) {
             throw new IllegalArgumentException("Apenas diárias pendentes podem ser aceitas.");
@@ -85,7 +85,7 @@ public class DiariaService {
         Diaria salva = diariaRepository.save(diaria);
 
         // Dispara mensagem assíncrona
-        String msg = "O profissional " + diaria.getContratado().getNome() + " aceitou sua solicitação!";
+        String msg = "O prestador de serviço " + diaria.getContratado().getNome() + " aceitou sua solicitação!";
         notificacaoService.notificarContratante(diaria.getContratante().getEmail(), msg);
 
         return mapper.toResponseDTO(salva);
@@ -136,7 +136,7 @@ public class DiariaService {
     }
 
     @Transactional(readOnly = true)
-    public Page<DiariaResponseDTO> listarDiariasPendentesDoProfissional(Long contratadoId, @ParameterObject Pageable pageable) {
+    public Page<DiariaResponseDTO> listarDiariasPendentesDoPrestador(Long contratadoId, @ParameterObject Pageable pageable) {
         Page<Diaria> diarias = diariaRepository.findByContratadoIdAndStatus(contratadoId, StatusDiaria.PENDENTE, pageable);
         return diarias.map(mapper::toResponseDTO);
     }

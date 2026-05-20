@@ -33,9 +33,9 @@ public class UsuarioController {
     }
 
     @GetMapping("/profissionais")
-    public ResponseEntity<Page<UsuarioResponseDTO>> listarProfissionais(
+    public ResponseEntity<Page<UsuarioResponseDTO>> listarPrestadores(
            @ParameterObject @PageableDefault(size = 12, sort = "nome") Pageable pageable) {
-        return ResponseEntity.ok(service.listarProfissionaisAtivos(pageable));
+        return ResponseEntity.ok(service.listarPrestadoresAtivos(pageable));
     }
 
     @GetMapping("/me")

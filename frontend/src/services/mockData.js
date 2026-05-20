@@ -4,7 +4,7 @@ export const MOCK_USERS = [
   {
     id: 1,
     nome: 'João Vitor',
-    email: 'contratante@gmail.com',
+    email: 'joao@gmail.com',
     senha: '123456',
     dataNascimento: '1995-01-01',
     tipo: 'CONTRATANTE',
@@ -13,7 +13,7 @@ export const MOCK_USERS = [
   {
     id: 2,
     nome: 'Pedro Henrique',
-    email: 'autonomo@gmail.com',
+    email: 'pedro@gmail.com',
     senha: '123456',
     dataNascimento: '1990-01-01',
     tipo: 'CONTRATADO',
@@ -22,6 +22,7 @@ export const MOCK_USERS = [
     valorBase: 180,
     avaliacao: 4.9,
     bairro: 'Centro',
+    disponibilidade: 'semana',
     descricao: 'Limpeza residencial completa, organização leve e materiais básicos inclusos.',
     fotoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80'
   },
@@ -37,6 +38,7 @@ export const MOCK_USERS = [
     valorBase: 220,
     avaliacao: 4.8,
     bairro: 'Jardim América',
+    disponibilidade: 'fim-de-semana',
     descricao: 'Poda, limpeza de jardim, retirada de folhas e manutenção de vasos.',
     fotoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80'
   },
@@ -52,6 +54,7 @@ export const MOCK_USERS = [
     valorBase: 260,
     avaliacao: 4.7,
     bairro: 'Vila Nova',
+    disponibilidade: 'semana',
     descricao: 'Pequenos reparos, troca de tomadas, torneiras, ajustes e instalações simples.',
     fotoUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80'
   },
@@ -67,10 +70,52 @@ export const MOCK_USERS = [
     valorBase: 200,
     avaliacao: 5,
     bairro: 'Boa Vista',
+    disponibilidade: 'fim-de-semana',
     descricao: 'Faxina detalhada para casas e apartamentos, com foco em cozinha e banheiros.',
     fotoUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80'
   }
 ]
+
+const REGISTERED_USERS_KEY = 'diariasJaRegisteredUsers'
+
+export const getRegisteredMockUsers = () => {
+  try {
+    return JSON.parse(localStorage.getItem(REGISTERED_USERS_KEY)) || []
+  } catch {
+    return []
+  }
+}
+
+export const createRegisteredMockUser = (dados) => {
+  const users = getRegisteredMockUsers()
+  const normalizedEmail = String(dados.email || '').toLowerCase()
+  const allUsers = [...MOCK_USERS, ...users]
+
+  if (allUsers.some(user => String(user.email).toLowerCase() === normalizedEmail)) {
+    throw new Error('Já existe uma conta com este e-mail.')
+  }
+
+  const user = {
+    id: Date.now(),
+    nome: dados.nome,
+    email: normalizedEmail,
+    senha: dados.senha,
+    dataNascimento: dados.dataNascimento,
+    tipo: dados.tipo,
+    ativo: true,
+    categoriaPrincipal: dados.tipo === 'CONTRATADO' ? 'Faxina' : undefined,
+    valorBase: dados.tipo === 'CONTRATADO' ? 180 : undefined,
+    avaliacao: dados.tipo === 'CONTRATADO' ? 4.8 : undefined,
+    bairro: dados.tipo === 'CONTRATADO' ? 'Aracaju' : undefined,
+    disponibilidade: dados.tipo === 'CONTRATADO' ? 'semana' : undefined,
+    descricao: dados.tipo === 'CONTRATADO' ? 'Prestador de serviço cadastrado no Diárias Já.' : undefined,
+    fotoUrl: dados.tipo === 'CONTRATADO' ? 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80' : undefined
+  }
+
+  localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify([...users, user]))
+  const { senha, ...response } = user
+  return response
+}
 
 export const MOCK_CATEGORIAS = [
   { id: 1, nome: 'Faxina', descricao: 'Limpeza residencial' },
@@ -108,7 +153,9 @@ const DEFAULT_MOCK_DIARIAS = [
 ]
 
 export const getMockUserByCredentials = (email, senha) => {
-  return MOCK_USERS.find(user => user.email === email && user.senha === senha)
+  const allUsers = [...MOCK_USERS, ...getRegisteredMockUsers()]
+  const normalizedEmail = String(email || '').toLowerCase()
+  return allUsers.find(user => String(user.email).toLowerCase() === normalizedEmail && user.senha === senha)
 }
 
 export const getMockCurrentUser = () => {
@@ -117,7 +164,7 @@ export const getMockCurrentUser = () => {
 
   try {
     const parsedUser = JSON.parse(savedUser)
-    const freshMock = MOCK_USERS.find(user => user.id === parsedUser.id)
+    const freshMock = [...MOCK_USERS, ...getRegisteredMockUsers()].find(user => user.id === parsedUser.id)
     if (!freshMock) return parsedUser
     const { senha, ...user } = freshMock
     localStorage.setItem('user', JSON.stringify(user))
@@ -175,7 +222,7 @@ export const addMockDiaria = (dados) => {
   const diaria = {
     id: Date.now(),
     nomeContratante: contratante?.nome || 'Contratante',
-    nomeContratado: contratado?.nome || 'Autônomo',
+    nomeContratado: contratado?.nome || 'Prestador de serviço',
     contratanteId: dados.contratanteId,
     contratadoId: dados.contratadoId,
     categoriaId: dados.categoriaId,

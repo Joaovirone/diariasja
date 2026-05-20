@@ -3,21 +3,21 @@
     <div class="page-header">
       <div>
         <h1>Solicitar nova diária</h1>
-        <p>Encontre um autônomo, filtre por serviço e solicite direto pelo perfil.</p>
+        <p>Encontre um prestador de serviço, filtre por serviço e solicite direto pelo perfil.</p>
       </div>
     </div>
 
     <div v-if="!isContratante" class="card">
       <strong>Acesso exclusivo para contratantes</strong>
-      <p class="text-muted mb-2">Profissionais autônomos acompanham oportunidades pela tela de serviços.</p>
+      <p class="text-muted mb-2">Prestadores de serviço acompanham oportunidades pela tela de serviços.</p>
       <router-link to="/diarias" class="btn btn-primary">Ver serviços</router-link>
     </div>
 
     <template v-else>
       <section class="filters-panel card">
         <div class="form-group">
-          <label for="busca">Buscar profissional</label>
-          <input v-model="filters.busca" id="busca" type="search" placeholder="Nome, bairro ou descrição" />
+          <label for="busca">Buscar prestador de serviço</label>
+          <input v-model="filters.busca" id="busca" type="search" placeholder="Nome, serviço, bairro ou descrição" />
         </div>
 
         <div class="form-group">
@@ -32,44 +32,53 @@
           <label for="valorMaximo">Valor máximo</label>
           <input v-model.number="filters.valorMaximo" id="valorMaximo" type="number" min="0" step="10" />
         </div>
+
+        <div class="form-group">
+          <label for="disponibilidadeFiltro">Disponibilidade</label>
+          <select v-model="filters.disponibilidade" id="disponibilidadeFiltro">
+            <option value="">Qualquer dia</option>
+            <option value="semana">Dias úteis</option>
+            <option value="fim-de-semana">Fim de semana</option>
+          </select>
+        </div>
       </section>
 
       <section class="professionals-grid">
         <article
-          v-for="profissional in profissionaisFiltrados"
-          :key="profissional.id"
+          v-for="prestador in prestadoresFiltrados"
+          :key="prestador.id"
           class="professional-card"
           tabindex="0"
           role="button"
-          @click="openProfile(profissional)"
-          @keydown.enter="openProfile(profissional)"
+          @click="openProfile(prestador)"
+          @keydown.enter="openProfile(prestador)"
         >
           <div class="photo-wrap">
-            <img :src="profissional.fotoUrl" :alt="`Foto de ${profissional.nome}`" @error="handleImageError" />
-            <span class="rating-badge">{{ profissional.avaliacao.toFixed(1) }}</span>
+            <img :src="prestador.fotoUrl" :alt="`Foto de ${prestador.nome}`" @error="handleImageError" />
+            <span class="rating-badge">{{ prestador.avaliacao.toFixed(1) }}</span>
           </div>
 
           <div class="professional-top">
             <div>
-              <h2>{{ profissional.nome }}</h2>
-              <p>{{ profissional.categoriaPrincipal }} · {{ profissional.bairro }}</p>
+              <h2>{{ prestador.nome }}</h2>
+              <p>{{ prestador.categoriaPrincipal }} · {{ prestador.bairro }}</p>
             </div>
           </div>
 
-          <p class="description">{{ profissional.descricao }}</p>
+          <p class="description">{{ prestador.descricao }}</p>
 
           <div class="professional-meta">
             <span>
               Atendimento
-              <strong>{{ profissional.categoriaPrincipal }}</strong>
+              <strong>{{ prestador.categoriaPrincipal }}</strong>
             </span>
             <span>
               Diária desde
-              <strong>{{ formatCurrency(profissional.valorBase) }}</strong>
+              <strong>{{ formatCurrency(prestador.valorBase) }}</strong>
             </span>
           </div>
 
-          <button type="button" class="btn btn-primary" @click.stop="openModal(profissional)">
+          <button type="button" class="btn btn-primary" @click.stop="openModal(prestador)">
             Ver perfil
           </button>
         </article>
@@ -177,7 +186,8 @@ const form = reactive({
 const filters = reactive({
   busca: '',
   categoria: '',
-  valorMaximo: 0
+  valorMaximo: 0,
+  disponibilidade: ''
 })
 
 const selectedProfessional = ref(null)
@@ -187,38 +197,39 @@ const error = ref(null)
 const hoje = new Date().toISOString().slice(0, 10)
 
 const categorias = computed(() => categoriaStore.categorias)
-const profissionais = computed(() => usuarioStore.profissionais)
+const prestadores = computed(() => usuarioStore.prestadores)
 const isContratante = computed(() => authStore.user?.tipo === 'CONTRATANTE')
 
-const profissionaisFiltrados = computed(() => {
+const prestadoresFiltrados = computed(() => {
   const busca = filters.busca.trim().toLowerCase()
 
-  return profissionais.value.filter((profissional) => {
+  return prestadores.value.filter((prestador) => {
     const matchesSearch = !busca || [
-      profissional.nome,
-      profissional.bairro,
-      profissional.descricao,
-      profissional.categoriaPrincipal
+      prestador.nome,
+      prestador.bairro,
+      prestador.descricao,
+      prestador.categoriaPrincipal
     ].some(value => String(value || '').toLowerCase().includes(busca))
-    const matchesCategory = !filters.categoria || profissional.categoriaPrincipal === filters.categoria
-    const matchesPrice = !filters.valorMaximo || Number(profissional.valorBase || 0) <= Number(filters.valorMaximo)
+    const matchesCategory = !filters.categoria || prestador.categoriaPrincipal === filters.categoria
+    const matchesPrice = !filters.valorMaximo || Number(prestador.valorBase || 0) <= Number(filters.valorMaximo)
+    const matchesAvailability = !filters.disponibilidade || prestador.disponibilidade === filters.disponibilidade
 
-    return matchesSearch && matchesCategory && matchesPrice
+    return matchesSearch && matchesCategory && matchesPrice && matchesAvailability
   })
 })
 
-const openModal = (profissional) => {
-  selectedProfessional.value = profissional
+const openModal = (prestador) => {
+  selectedProfessional.value = prestador
   profileProfessional.value = null
-  const categoria = categorias.value.find(item => item.nome === profissional.categoriaPrincipal)
+  const categoria = categorias.value.find(item => item.nome === prestador.categoriaPrincipal)
   form.categoriaId = categoria?.id || ''
-  form.valorServico = profissional.valorBase || 180
+  form.valorServico = prestador.valorBase || 180
   form.dataServico = ''
   error.value = null
 }
 
-const openProfile = (profissional) => {
-  profileProfessional.value = profissional
+const openProfile = (prestador) => {
+  profileProfessional.value = prestador
 }
 
 const closeProfile = () => {
@@ -270,7 +281,7 @@ const handleSubmit = async () => {
 onMounted(async () => {
   await Promise.all([
     categoriaStore.listar(0, 100),
-    usuarioStore.listarProfissionais(0, 100)
+    usuarioStore.listarPrestadores(0, 100)
   ])
 })
 </script>
@@ -278,7 +289,7 @@ onMounted(async () => {
 <style scoped>
 .filters-panel {
   display: grid;
-  grid-template-columns: minmax(320px, 1fr) 260px 220px;
+  grid-template-columns: minmax(320px, 1fr) 230px 180px 200px;
   gap: 1rem;
   margin-bottom: 1rem;
 }

@@ -1,17 +1,17 @@
 <template>
   <div class="container">
-    <section class="dashboard-hero" :class="{ worker: !isContratante }">
+    <section class="dashboard-hero" :class="{ provider: !isContratante }">
       <div>
-        <span class="pill">{{ isContratante ? 'Contratante' : 'Autônomo' }}</span>
-        <h1>{{ isContratante ? 'Encontre o profissional certo para sua diária' : 'Organize seus serviços e aumente seus ganhos' }}</h1>
+        <span class="pill">{{ isContratante ? 'Contratante' : 'Prestador de serviço' }}</span>
+        <h1>{{ isContratante ? 'Encontre prestadores de serviço com clareza' : 'Gerencie seu trabalho em um só lugar' }}</h1>
         <p>
           {{ isContratante
-            ? 'Compare autônomos, acompanhe pedidos e centralize conversas antes do atendimento.'
-            : 'Veja oportunidades, confirme sua agenda e acompanhe quanto você tem a receber.' }}
+            ? 'Pesquise por categoria, localização, disponibilidade e preço antes de iniciar uma contratação.'
+            : 'Atualize seus serviços, contatos, disponibilidade e acompanhe oportunidades sem perder contexto.' }}
         </p>
       </div>
-      <router-link v-if="isContratante" to="/diarias/criar" class="btn btn-primary">Buscar autônomos</router-link>
-      <router-link v-else to="/diarias" class="btn btn-primary">Ver oportunidades</router-link>
+      <router-link v-if="isContratante" to="/diarias/criar" class="btn btn-primary">Pesquisar prestadores</router-link>
+      <router-link v-else to="/perfil" class="btn btn-primary">Completar perfil</router-link>
     </section>
 
     <div v-if="isLoading" class="loading">
@@ -23,21 +23,65 @@
         <div class="metrics-grid">
           <div class="metric-card"><i></i><span>Pedidos abertos</span><strong>{{ pendentes }}</strong></div>
           <div class="metric-card"><i></i><span>Diárias confirmadas</span><strong>{{ confirmadas }}</strong></div>
-          <div class="metric-card"><i></i><span>Profissionais ativos</span><strong>4</strong></div>
+          <div class="metric-card"><i></i><span>Prestadores ativos</span><strong>{{ prestadores.length }}</strong></div>
           <div class="metric-card money-card"><i></i><span>Valor contratado</span><strong>{{ formatCurrency(totalFinanceiro) }}</strong></div>
         </div>
+
+        <section class="card search-panel mt-4">
+          <div class="search-header">
+            <div>
+              <h2>Busca para contratação</h2>
+              <p>Filtre por serviço, localização, disponibilidade e faixa de preço.</p>
+            </div>
+            <router-link to="/diarias/criar" class="btn btn-primary btn-small">Busca completa</router-link>
+          </div>
+
+          <div class="filters-row">
+            <div class="form-group">
+              <label for="buscaPrestador">Prestador ou serviço</label>
+              <input v-model="filters.busca" id="buscaPrestador" type="search" placeholder="Nome, serviço ou bairro" />
+            </div>
+            <div class="form-group">
+              <label for="categoria">Categoria</label>
+              <select v-model="filters.categoria" id="categoria">
+                <option value="">Todas</option>
+                <option v-for="categoria in categoriasDisponiveis" :key="categoria" :value="categoria">{{ categoria }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="valorMaximo">Preço máximo</label>
+              <input v-model.number="filters.valorMaximo" id="valorMaximo" type="number" min="0" step="10" placeholder="Ex.: 220" />
+            </div>
+          </div>
+
+          <div class="provider-list">
+            <article v-for="prestador in prestadoresFiltrados" :key="prestador.id" class="provider-card">
+              <img :src="prestador.fotoUrl" :alt="`Foto de ${prestador.nome}`" @error="handleImageError" />
+              <div>
+                <h3>{{ prestador.nome }}</h3>
+                <p>{{ prestador.categoriaPrincipal }} · {{ prestador.bairro || 'Sergipe' }}</p>
+                <span>{{ prestador.descricao }}</span>
+              </div>
+              <div class="provider-actions">
+                <strong>{{ formatCurrency(prestador.valorBase) }}</strong>
+                <small>Disponível</small>
+                <router-link to="/diarias/criar" class="btn btn-small">Detalhes</router-link>
+              </div>
+            </article>
+          </div>
+        </section>
 
         <div class="dashboard-grid mt-4">
           <section class="card primary-panel">
             <div class="card-header">
-              <h2>Minhas solicitações</h2>
+              <h2>Contratações recentes</h2>
               <router-link to="/diarias" class="btn btn-small">Ver todas</router-link>
             </div>
             <div class="work-list">
               <article v-for="diaria in diariasRecentes" :key="diaria.id" class="work-item">
                 <div>
                   <h3>{{ diaria.nomeCategoria }}</h3>
-                  <p>Profissional: {{ diaria.nomeContratado }}</p>
+                  <p>Prestador de serviço: {{ diaria.nomeContratado }}</p>
                 </div>
                 <div class="work-meta">
                   <strong>{{ formatCurrency(diaria.valorServico) }}</strong>
@@ -49,23 +93,14 @@
           </section>
 
           <aside class="card focus-card">
-            <h2>Contratação rápida</h2>
-            <p>Filtre por categoria, avaliação e valor para encontrar autônomos disponíveis.</p>
+            <h2>Atalhos do contratante</h2>
+            <p>Continue uma busca, revise contatos salvos ou acompanhe conversas abertas.</p>
             <div class="quick-actions">
-              <router-link to="/diarias/criar" class="btn btn-primary">Solicitar diária</router-link>
-              <router-link to="/chat" class="btn">Conversar</router-link>
+              <router-link to="/diarias/criar" class="btn btn-primary">Pesquisar</router-link>
+              <router-link to="/chat" class="btn">Conversas</router-link>
               <router-link to="/notificacoes" class="btn">Notificações</router-link>
             </div>
           </aside>
-
-          <section class="card notification-preview">
-            <div class="card-header"><h2>Resumo do contratante</h2></div>
-            <div class="insight-grid">
-              <div><strong>Melhor categoria:</strong><span>Faxina residencial</span></div>
-              <div><strong>Último contato:</strong><span>Pedro Henrique respondeu no chat</span></div>
-              <div><strong>Próxima diária:</strong><span>{{ nextDateLabel }}</span></div>
-            </div>
-          </section>
         </div>
       </section>
 
@@ -74,10 +109,23 @@
           <div class="metric-card"><i></i><span>Oportunidades</span><strong>{{ pendentes }}</strong></div>
           <div class="metric-card"><i></i><span>Na agenda</span><strong>{{ confirmadas }}</strong></div>
           <div class="metric-card"><i></i><span>Concluídas</span><strong>{{ concluidas }}</strong></div>
-          <div class="metric-card money-card"><i></i><span>Dinheiro a receber</span><strong>{{ formatCurrency(totalFinanceiro) }}</strong></div>
+          <div class="metric-card money-card"><i></i><span>A receber</span><strong>{{ formatCurrency(totalFinanceiro) }}</strong></div>
         </div>
 
-        <div class="dashboard-grid mt-4">
+        <div class="provider-grid mt-4">
+          <section class="card profile-progress">
+            <div class="card-header">
+              <h2>Resumo do perfil</h2>
+              <router-link to="/perfil" class="btn btn-primary btn-small">Editar</router-link>
+            </div>
+            <div class="profile-checklist">
+              <span><strong>Serviço principal</strong> Faxina residencial</span>
+              <span><strong>Área de atuação</strong> Aracaju e região</span>
+              <span><strong>Disponibilidade</strong> Segunda a sábado</span>
+              <span><strong>Contato</strong> Telefone e chat ativos</span>
+            </div>
+          </section>
+
           <section class="card primary-panel">
             <div class="card-header">
               <h2>Agenda e oportunidades</h2>
@@ -98,24 +146,15 @@
             </div>
           </section>
 
-          <aside class="card focus-card worker-card">
-            <h2>Minha operação</h2>
-            <p>Atualize valor base, disponibilidade e mantenha o chat ativo para fechar mais serviços.</p>
+          <aside class="card focus-card provider-focus">
+            <h2>Gestão do trabalho</h2>
+            <p>Mantenha descrição, horário, localização, preço e formas de contato sempre atualizados.</p>
             <div class="quick-actions">
-              <router-link to="/perfil" class="btn btn-primary">Editar perfil</router-link>
-              <router-link to="/chat" class="btn">Abrir chat</router-link>
+              <router-link to="/perfil" class="btn btn-primary">Perfil de serviço</router-link>
+              <router-link to="/chat" class="btn">Conversas</router-link>
               <router-link to="/notificacoes" class="btn">Oportunidades</router-link>
             </div>
           </aside>
-
-          <section class="card notification-preview">
-            <div class="card-header"><h2>Resumo do autônomo</h2></div>
-            <div class="insight-grid">
-              <div><strong>Valor base:</strong><span>R$ 180,00</span></div>
-              <div><strong>Categoria forte:</strong><span>Faxina residencial</span></div>
-              <div><strong>Próximo serviço:</strong><span>{{ nextDateLabel }}</span></div>
-            </div>
-          </section>
         </div>
       </section>
     </template>
@@ -123,15 +162,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useAuthStore } from '../stores/authStore'
 import { useDiariaStore } from '../stores/diariaStore'
+import { useUsuarioStore } from '../stores/usuarioStore'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 const authStore = useAuthStore()
 const diariaStore = useDiariaStore()
+const usuarioStore = useUsuarioStore()
 const isLoading = ref(false)
+const filters = reactive({
+  busca: '',
+  categoria: '',
+  valorMaximo: 0
+})
 
 const isContratante = computed(() => authStore.user?.tipo === 'CONTRATANTE')
 const sourceDiarias = computed(() => isContratante.value ? diariaStore.diarias : diariaStore.diariasPendentes)
@@ -142,7 +188,25 @@ const concluidas = computed(() => sourceDiarias.value.filter(d => d.status === '
 const totalFinanceiro = computed(() => sourceDiarias.value
   .filter(d => ['CONFIRMADA', 'CONCLUIDA'].includes(d.status))
   .reduce((total, diaria) => total + Number(diaria.valorServico || 0), 0))
-const nextDateLabel = computed(() => diariasRecentes.value[0]?.dataServico ? formatDate(diariasRecentes.value[0].dataServico) : 'Sem data marcada')
+const prestadores = computed(() => usuarioStore.prestadores)
+const categoriasDisponiveis = computed(() => [...new Set(prestadores.value.map(item => item.categoriaPrincipal).filter(Boolean))])
+const prestadoresFiltrados = computed(() => {
+  const busca = filters.busca.trim().toLowerCase()
+
+  return prestadores.value.filter((prestador) => {
+    const searchable = [
+      prestador.nome,
+      prestador.bairro,
+      prestador.descricao,
+      prestador.categoriaPrincipal
+    ].join(' ').toLowerCase()
+    const matchesSearch = !busca || searchable.includes(busca)
+    const matchesCategory = !filters.categoria || prestador.categoriaPrincipal === filters.categoria
+    const matchesPrice = !filters.valorMaximo || Number(prestador.valorBase || 0) <= Number(filters.valorMaximo)
+
+    return matchesSearch && matchesCategory && matchesPrice
+  }).slice(0, 4)
+})
 
 const formatDate = (date) => format(new Date(date), 'dd MMM yyyy', { locale: ptBR })
 const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', {
@@ -163,12 +227,19 @@ const getStatusClass = (status) => ({
   CANCELADA: 'danger'
 }[status] || 'info')
 
+const handleImageError = (event) => {
+  event.target.src = 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80'
+}
+
 onMounted(async () => {
   isLoading.value = true
   if (isContratante.value) {
-    await diariaStore.listarPorContratante(authStore.user.id, 0, 10)
+    await Promise.all([
+      diariaStore.listarPorContratante(authStore.user.id, 0, 10),
+      usuarioStore.listarPrestadores(0, 100)
+    ])
   } else {
-    await diariaStore.listarPendentesProfissional(authStore.user.id, 0, 10)
+    await diariaStore.listarPendentesPrestador(authStore.user.id, 0, 10)
   }
   isLoading.value = false
 })
@@ -178,13 +249,13 @@ onMounted(async () => {
 .dashboard-hero {
   position: relative;
   overflow: hidden;
-  min-height: 300px;
-  padding: 3rem;
+  min-height: 260px;
+  padding: clamp(1.5rem, 4vw, 3rem);
   margin-bottom: 1.5rem;
-  border-radius: 24px;
+  border-radius: 16px;
   background:
-    radial-gradient(circle at 82% 22%, rgba(255, 122, 61, 0.42), transparent 15rem),
-    linear-gradient(130deg, #0e7c72 0%, #0b3f3b 42%, #101828 100%);
+    radial-gradient(circle at 82% 18%, rgba(242, 183, 5, 0.24), transparent 15rem),
+    linear-gradient(130deg, #075f7a 0%, #168a58 58%, #10202b 100%);
   color: white;
   display: flex;
   align-items: flex-end;
@@ -192,10 +263,10 @@ onMounted(async () => {
   gap: 1rem;
 }
 
-.dashboard-hero.worker {
+.dashboard-hero.provider {
   background:
-    radial-gradient(circle at 82% 22%, rgba(37, 208, 189, 0.34), transparent 15rem),
-    linear-gradient(130deg, #172554 0%, #0e7c72 48%, #101828 100%);
+    radial-gradient(circle at 82% 18%, rgba(242, 183, 5, 0.2), transparent 15rem),
+    linear-gradient(130deg, #06364a 0%, #0b6f8f 45%, #168a58 100%);
 }
 
 .dashboard-hero::after {
@@ -222,12 +293,8 @@ onMounted(async () => {
 .dashboard-hero p {
   max-width: 820px;
   margin-top: 0.5rem;
-  color: #d1faf4;
+  color: #e3eeee;
   font-size: 1.05rem;
-}
-
-.dashboard-hero h1 {
-  max-width: 980px;
 }
 
 .pill {
@@ -236,7 +303,6 @@ onMounted(async () => {
   padding: 0.35rem 0.7rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(12px);
   font-weight: 800;
   text-transform: uppercase;
   font-size: 0.76rem;
@@ -249,13 +315,11 @@ onMounted(async () => {
 }
 
 .metric-card {
-  position: relative;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   border: 1px solid var(--border-color);
-  border-radius: 18px;
+  border-radius: 8px;
   min-height: 126px;
-  padding: 1.45rem;
+  padding: 1.35rem;
   box-shadow: var(--shadow);
 }
 
@@ -268,8 +332,8 @@ onMounted(async () => {
   background: var(--primary);
 }
 
-.metric-card:nth-child(2) i { background: #2563eb; }
-.metric-card:nth-child(3) i { background: #16a34a; }
+.metric-card:nth-child(2) i { background: var(--sergipe-green); }
+.metric-card:nth-child(3) i { background: var(--sergipe-yellow); }
 
 .metric-card span {
   color: var(--muted);
@@ -279,112 +343,132 @@ onMounted(async () => {
 .metric-card strong {
   display: block;
   margin-top: 0.5rem;
-  font-size: 2.65rem;
+  font-size: 2.25rem;
   color: var(--dark);
 }
 
 .money-card {
-  background: linear-gradient(145deg, #ecfdf3, #ffffff);
-  border-color: #abefc6;
+  background: linear-gradient(145deg, #f3fbf5, #ffffff);
+  border-color: #b7e4c8;
 }
-
-.money-card i { background: var(--accent); }
 
 .money-card strong {
-  color: #067647;
-  font-size: 2.1rem;
+  color: var(--sergipe-green-dark);
+  font-size: 1.8rem;
 }
 
-.dashboard-grid {
+.search-header,
+.dashboard-grid,
+.provider-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(360px, 0.65fr);
   gap: 1rem;
 }
 
-.work-list {
+.search-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+
+.search-header p,
+.focus-card p,
+.work-item p,
+.provider-card p,
+.provider-card span {
+  color: var(--muted);
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 220px 180px;
+  gap: 1rem;
+}
+
+.provider-list,
+.work-list,
+.profile-checklist,
+.quick-actions {
   display: grid;
   gap: 0.75rem;
 }
 
+.provider-card,
 .work-item {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 1rem;
-  padding: 1.15rem;
+  align-items: center;
+  padding: 1rem;
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: 8px;
   background: #fbfcfd;
 }
 
-.work-item p,
-.focus-card p {
-  color: var(--muted);
-  margin-top: 0.25rem;
+.provider-card img {
+  width: 76px;
+  height: 76px;
+  border-radius: 8px;
+  object-fit: cover;
 }
 
+.provider-actions,
 .work-meta {
   display: grid;
   justify-items: end;
-  gap: 0.45rem;
+  gap: 0.35rem;
   white-space: nowrap;
 }
 
+.provider-actions strong,
 .work-meta strong {
   color: var(--primary);
 }
 
+.dashboard-grid {
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.65fr);
+}
+
+.provider-grid {
+  grid-template-columns: minmax(320px, 0.8fr) minmax(0, 1.25fr) minmax(300px, 0.7fr);
+}
+
 .focus-card {
-  background: linear-gradient(160deg, #fff7ed, #ffffff);
-  border-color: #fed7aa;
+  background: linear-gradient(160deg, #fff8df, #ffffff);
+  border-color: #f7d868;
 }
 
-.worker-card {
-  background: linear-gradient(160deg, #ecfeff, #ffffff);
-  border-color: #a5f3fc;
+.provider-focus {
+  background: linear-gradient(160deg, #e8f7ef, #ffffff);
+  border-color: #b7e4c8;
 }
 
-.notification-preview {
-  grid-column: 1 / -1;
-}
-
-.insight-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.insight-grid div {
-  padding: 1rem;
-  border-radius: 16px;
-  background: #fbfcfd;
-  border: 1px solid var(--border-color);
-}
-
-.insight-grid strong {
-  display: inline;
-}
-
-.insight-grid span {
-  display: inline;
+.profile-checklist span {
+  padding: 0.85rem;
+  border-radius: 8px;
+  background: var(--soft);
   color: var(--muted);
-  margin-left: 0.25rem;
 }
 
-.quick-actions {
-  display: grid;
-  gap: 0.65rem;
-  margin-top: 1.25rem;
+.profile-checklist strong {
+  display: block;
+  color: var(--dark);
+  margin-bottom: 0.2rem;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-grid,
+  .provider-grid,
+  .filters-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 900px) {
   .dashboard-hero,
-  .work-item {
+  .provider-card,
+  .work-item,
+  .search-header {
     align-items: stretch;
-    flex-direction: column;
-  }
-
-  .dashboard-grid,
-  .insight-grid {
     grid-template-columns: 1fr;
   }
 
@@ -392,16 +476,13 @@ onMounted(async () => {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .provider-actions,
   .work-meta {
     justify-items: start;
   }
 }
 
 @media (max-width: 620px) {
-  .dashboard-hero {
-    padding: 1.5rem;
-  }
-
   .metrics-grid {
     grid-template-columns: 1fr;
   }

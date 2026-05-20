@@ -14,6 +14,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     
     Optional<Usuario> findByEmail(String email);
 
-    // Lista profissionais disponíves (Ativos) e com paginação
+    // Lista prestadores de serviço disponíveis e com paginação
     Page<Usuario> findByTipoAndAtivoTrue(TipoUsuario tipo, Pageable pageable);
 }

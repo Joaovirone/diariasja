@@ -190,7 +190,7 @@ const loadDiarias = async () => {
   if (isContratante.value) {
     await diariaStore.listarPorContratante(authStore.user.id, 0, 20)
   } else {
-    await diariaStore.listarPendentesProfissional(authStore.user.id, 0, 20)
+    await diariaStore.listarPendentesPrestador(authStore.user.id, 0, 20)
   }
 }
 

@@ -27,19 +27,19 @@ export const diariaService = {
     })
   },
 
-  aceitar(id, idProfissional) {
+  aceitar(id, idPrestador) {
     if (isMockToken()) {
       const diarias = getMockDiarias()
       const index = diarias.findIndex(diaria => diaria.id === Number(id))
       if (index > -1) {
-        diarias[index] = { ...diarias[index], status: 'CONFIRMADA', contratadoId: idProfissional }
+        diarias[index] = { ...diarias[index], status: 'CONFIRMADA', contratadoId: idPrestador }
         saveMockDiarias(diarias)
         return Promise.resolve({ data: diarias[index] })
       }
     }
 
     return api.patch(`/diarias/${id}/aceitar`, null, {
-      params: { idProfissional }
+      params: { idProfissional: idPrestador }
     })
   },
 
@@ -71,7 +71,7 @@ export const diariaService = {
     })
   },
 
-  listarPendentesProfissional(contratadoId, page = 0, size = 10, sort = 'dataServico') {
+  listarPendentesPrestador(contratadoId, page = 0, size = 10, sort = 'dataServico') {
     if (isMockToken()) {
       const diarias = getMockDiarias().filter(diaria => {
         const belongsToProfessional = !diaria.contratadoId || Number(diaria.contratadoId) === Number(contratadoId)

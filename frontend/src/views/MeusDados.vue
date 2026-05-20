@@ -71,7 +71,7 @@ const historicoRecente = computed(() => diariaStore.diarias)
 const concluidas = computed(() => historicoRecente.value.filter(d => d.status === 'CONCLUIDA').length)
 
 const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy', { locale: ptBR })
-const formatTipo = (tipo) => tipo === 'CONTRATANTE' ? 'Contratante' : 'Profissional'
+const formatTipo = (tipo) => tipo === 'CONTRATANTE' ? 'Contratante' : 'Prestador de serviço'
 
 const formatStatus = (status) => {
   const statusMap = {
@@ -99,7 +99,7 @@ onMounted(async () => {
   if (usuario.value?.tipo === 'CONTRATANTE') {
     await diariaStore.listarPorContratante(authStore.user.id, 0, 5)
   } else {
-    await diariaStore.listarPendentesProfissional(authStore.user.id, 0, 5)
+    await diariaStore.listarPendentesPrestador(authStore.user.id, 0, 5)
     diariaStore.diarias = diariaStore.diariasPendentes
   }
 })
@@ -132,7 +132,7 @@ onMounted(async () => {
 }
 
 .value {
-  color: #667eea;
+  color: var(--primary);
   font-weight: 500;
 }
 

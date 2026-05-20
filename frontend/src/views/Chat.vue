@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h1>Chat</h1>
-        <p>Converse com {{ isContratante ? 'profissionais' : 'contratantes' }} e combine os detalhes da diária.</p>
+        <p>Converse com {{ isContratante ? 'prestadores de serviço' : 'contratantes' }} e combine os detalhes da diária.</p>
       </div>
     </div>
 
@@ -264,8 +264,8 @@ watch(activeMessages, async () => {
   border-radius: 14px;
   display: grid;
   place-items: center;
-  background: #ccfbf1;
-  color: #115e59;
+  background: var(--primary-soft);
+  color: var(--primary);
   font-weight: 900;
 }
 
@@ -350,7 +350,7 @@ watch(activeMessages, async () => {
 
 .message.mine {
   align-self: flex-end;
-  background: linear-gradient(135deg, var(--primary), #11a090);
+  background: linear-gradient(135deg, var(--primary), var(--sergipe-green));
   color: white;
   border-color: transparent;
   border-radius: 18px 18px 6px 18px;
