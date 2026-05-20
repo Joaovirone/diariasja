@@ -44,10 +44,10 @@ public class UsuarioService {
     }
 
     @Transactional(readOnly = true)
-    public Page<UsuarioResponseDTO> listarProfissionaisAtivos(Pageable pageable) {
+    public Page<UsuarioResponseDTO> listarPrestadoresAtivos(Pageable pageable) {
         // Busca apenas usuários do tipo CONTRATADO e que estão ativos
-        Page<Usuario> profissionais = repository.findByTipoAndAtivoTrue(TipoUsuario.CONTRATADO, pageable);
-        return profissionais.map(mapper::toResponseDTO);
+        Page<Usuario> prestadores = repository.findByTipoAndAtivoTrue(TipoUsuario.CONTRATADO, pageable);
+        return prestadores.map(mapper::toResponseDTO);
     }
 
     public UsuarioResponseDTO buscarPorEmail(String email) {

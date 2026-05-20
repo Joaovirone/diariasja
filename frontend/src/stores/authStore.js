@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { authService } from '../services/authService'
 import { usuarioService } from '../services/usuarioService'
 import { getApiErrorMessage } from '../services/api'
-import { getMockUserByCredentials, MOCK_TOKEN_PREFIX } from '../services/mockData'
+import { getMockUserByCredentials, MOCK_TOKEN_PREFIX, MOCK_USERS } from '../services/mockData'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(null)
@@ -58,7 +58,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
     if (savedUser) {
       try {
-        user.value = JSON.parse(savedUser)
+        const parsedUser = JSON.parse(savedUser)
+        const freshMock = MOCK_USERS.find(mockUser => mockUser.id === parsedUser.id)
+        if (freshMock) {
+          const { senha, ...usuarioMockado } = freshMock
+          user.value = usuarioMockado
+          localStorage.setItem('user', JSON.stringify(usuarioMockado))
+        } else {
+          user.value = parsedUser
+        }
       } catch {
         localStorage.removeItem('user')
       }

@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/usuarios/cadastrar").permitAll()
                 
-                // Opcional: A vitrine de profissionais deve ser pública para os clientes verem quem está disponível
+                // Opcional: A vitrine de prestadores de serviço deve ser pública para os clientes verem quem está disponível
                 .requestMatchers(HttpMethod.GET, "/api/usuarios/profissionais").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
                 

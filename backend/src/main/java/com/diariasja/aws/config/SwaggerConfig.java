@@ -16,7 +16,7 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info().title("Diárias Já API").version("1.0.0")
-                .description("Documentação oficial da API RESTful para o sistema de agendamento de autônomos. Esta especificação está formatada para futura integração com o Amazon API Gateway."))
+                .description("Documentação oficial da API RESTful para o sistema de agendamento de prestadores de serviço. Esta especificação está formatada para futura integração com o Amazon API Gateway."))
                 // Adiciona o cadeado de segurança em todos os endpoints
 
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))

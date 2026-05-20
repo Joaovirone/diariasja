@@ -40,7 +40,7 @@ public class DiariaController {
     }
 
     @PatchMapping("/{id}/aceitar")
-    public ResponseEntity<DiariaResponseDTO> aceitar(@PathVariable Long id, @RequestParam Long idProfissional) {
+    public ResponseEntity<DiariaResponseDTO> aceitar(@PathVariable Long id, @RequestParam(name = "idProfissional") Long idPrestador) {
         // Extrair email do JWT via SecurityContextHolder
         String emailLogado = SecurityContextHolder.getContext().getAuthentication().getName();
         
@@ -48,12 +48,12 @@ public class DiariaController {
         Usuario usuarioLogado = usuarioRepository.findByEmail(emailLogado)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário logado não encontrado"));
         
-        // Validar se o usuário logado é o profissional que está tentando aceitar
-        if (!usuarioLogado.getId().equals(idProfissional)) {
+        // Validar se o usuário logado é o prestador de serviço que está tentando aceitar
+        if (!usuarioLogado.getId().equals(idPrestador)) {
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }
         
-        return ResponseEntity.ok(service.aceitarDiaria(id, idProfissional));
+        return ResponseEntity.ok(service.aceitarDiaria(id, idPrestador));
     }
 
     @PatchMapping("/{id}/avaliar")
@@ -93,6 +93,6 @@ public class DiariaController {
             @PathVariable Long contratadoId,
             @ParameterObject
             @PageableDefault(size = 10, sort = "dataServico") Pageable pageable) {
-        return ResponseEntity.ok(service.listarDiariasPendentesDoProfissional(contratadoId, pageable));
+        return ResponseEntity.ok(service.listarDiariasPendentesDoPrestador(contratadoId, pageable));
     }
 }

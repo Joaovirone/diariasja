@@ -13,9 +13,9 @@ public interface DiariaRepository extends JpaRepository<Diaria, Long> {
     // Retorna o histórico de diárias de um cliente paginado (ex: 10 por página)
     Page<Diaria> findByContratanteId(Long contratanteId, Pageable pageable);
 
-    // Retorna a agenda de um profissional
+    // Retorna a agenda de um prestador de serviço
     Page<Diaria> findByContratadoId(Long contratadoId, Pageable pageable);
 
-    // Retorna a agenda de um profissional filtrando por Status (ex: Quero ver apenas as PENDENTES)
+    // Retorna a agenda de um prestador de serviço filtrando por Status
     Page<Diaria> findByContratadoIdAndStatus(Long contratadoId, StatusDiaria status, Pageable pageable);
 }

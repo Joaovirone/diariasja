@@ -1,9 +1,9 @@
 <template>
   <div class="container">
     <div class="page-header">
-      <h1>Gerenciar Categorias</h1>
+      <h1>Gerenciar categorias</h1>
       <button @click="showFormCreate = true" class="btn btn-primary">
-        + Nova Categoria
+        + Nova categoria
       </button>
     </div>
 

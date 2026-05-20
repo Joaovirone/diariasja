@@ -1,10 +1,11 @@
 <template>
   <div class="container">
     <div class="page-header">
-      <h1>Minhas Diárias</h1>
-      <router-link to="/diarias/criar" class="btn btn-primary">
-        + Solicitar Nova Diária
-      </router-link>
+      <div>
+        <h1>{{ isContratante ? 'Minhas diárias' : 'Serviços disponíveis' }}</h1>
+        <p>{{ isContratante ? 'Acompanhe seus pedidos e combine detalhes pelo chat.' : 'Aceite oportunidades e gerencie os próximos atendimentos.' }}</p>
+      </div>
+      <router-link v-if="isContratante" to="/diarias/criar" class="btn btn-primary">Solicitar diária</router-link>
     </div>
 
     <div v-if="isLoading" class="loading">
@@ -12,13 +13,11 @@
     </div>
 
     <div v-else>
-      <div v-if="error" class="alert alert-error">
-        {{ error }}
-      </div>
+      <div v-if="error" class="alert alert-error">{{ error }}</div>
 
       <div class="filters">
         <select v-model="filtroStatus" class="filter-select">
-          <option value="">Todos os Status</option>
+          <option value="">Todos os status</option>
           <option value="PENDENTE">Pendente</option>
           <option value="CONFIRMADA">Confirmada</option>
           <option value="CONCLUIDA">Concluída</option>
@@ -27,39 +26,50 @@
       </div>
 
       <div v-if="diariasFiltradas.length === 0" class="card text-center">
-        <p class="text-muted">Nenhuma diária encontrada</p>
+        <strong>Nada encontrado</strong>
+        <p class="text-muted">Quando houver diárias neste perfil, elas aparecem aqui.</p>
       </div>
 
-      <div v-else class="grid grid-1">
-        <div
-          v-for="diaria in diariasFiltradas"
-          :key="diaria.id"
-          class="card diaria-card"
-        >
-          <div class="diaria-header">
+      <div v-else class="diarias-grid">
+        <article v-for="diaria in diariasFiltradas" :key="diaria.id" class="diaria-card">
+          <div class="diaria-top">
             <div>
               <h3>{{ diaria.nomeCategoria }}</h3>
-              <p class="text-muted">{{ diaria.nomeContratante }}</p>
+              <p>{{ isContratante ? diaria.nomeContratado : diaria.nomeContratante }}</p>
             </div>
-            <span :class="`badge badge-${getStatusClass(diaria.status)}`">
-              {{ formatStatus(diaria.status) }}
-            </span>
+            <span :class="`badge badge-${getStatusClass(diaria.status)}`">{{ formatStatus(diaria.status) }}</span>
           </div>
 
-          <div class="diaria-body">
-            <div class="info-item">
-              <span class="label">Data:</span>
-              <span>{{ formatDate(diaria.dataServico) }}</span>
+          <div class="diaria-info">
+            <div>
+              <span>Data</span>
+              <strong>{{ formatDate(diaria.dataServico) }}</strong>
             </div>
-            <div class="info-item">
-              <span class="label">Contratado:</span>
-              <span>{{ diaria.nomeContratado }}</span>
+            <div>
+              <span>{{ isContratante ? 'Valor combinado' : 'Seu valor' }}</span>
+              <strong v-if="isContratante">{{ formatCurrency(diaria.valorServico) }}</strong>
+              <input
+                v-else
+                :value="getValorServico(diaria)"
+                type="number"
+                min="0"
+                step="10"
+                aria-label="Valor do serviço"
+                @input="updateValorServico(diaria.id, $event.target.value)"
+              />
             </div>
           </div>
 
-          <div class="diaria-footer">
+          <div class="diaria-actions">
             <button
-              v-if="diaria.status === 'CONCLUIDA'"
+              v-if="!isContratante && diaria.status === 'PENDENTE'"
+              class="btn btn-success btn-small"
+              @click="aceitarDiaria(diaria.id)"
+            >
+              Aceitar
+            </button>
+            <button
+              v-if="isContratante && diaria.status === 'CONCLUIDA'"
               class="btn btn-success btn-small"
               @click="avaliarDiaria(diaria.id)"
             >
@@ -72,8 +82,9 @@
             >
               Cancelar
             </button>
+            <router-link to="/chat" class="btn btn-small">Chat</router-link>
           </div>
-        </div>
+        </article>
       </div>
     </div>
 
@@ -94,46 +105,75 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import ModalAvaliacao from '../components/ModalAvaliacao.vue'
 
+const VALORES_KEY = 'diariasJaValoresServico'
 const authStore = useAuthStore()
 const diariaStore = useDiariaStore()
 const filtroStatus = ref('')
 const showModalAvaliacao = ref(false)
 const diariaEmAvaliacao = ref(null)
+const valoresServico = ref(loadValoresServico())
 
+const isContratante = computed(() => authStore.user?.tipo === 'CONTRATANTE')
 const isLoading = computed(() => diariaStore.isLoading)
 const error = computed(() => diariaStore.error)
+const sourceDiarias = computed(() => isContratante.value ? diariaStore.diarias : diariaStore.diariasPendentes)
 
 const diariasFiltradas = computed(() => {
-  if (!filtroStatus.value) return diariaStore.diarias
-  return diariaStore.diarias.filter(d => d.status === filtroStatus.value)
+  if (!filtroStatus.value) return sourceDiarias.value
+  return sourceDiarias.value.filter(d => d.status === filtroStatus.value)
 })
 
 const formatDate = (date) => format(new Date(date), 'dd MMM yyyy', { locale: ptBR })
+const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+}).format(Number(value || 0))
+const formatStatus = (status) => ({
+  PENDENTE: 'Pendente',
+  CONFIRMADA: 'Confirmada',
+  CONCLUIDA: 'Concluída',
+  CANCELADA: 'Cancelada'
+}[status] || status)
 
-const formatStatus = (status) => {
-  const statusMap = {
-    PENDENTE: 'Pendente',
-    CONFIRMADA: 'Confirmada',
-    CONCLUIDA: 'Concluída',
-    CANCELADA: 'Cancelada'
-  }
-  return statusMap[status] || status
-}
-
-const getStatusClass = (status) => {
-  const classMap = {
-    PENDENTE: 'info',
-    CONFIRMADA: 'success',
-    CONCLUIDA: 'success',
-    CANCELADA: 'danger'
-  }
-  return classMap[status] || 'info'
-}
+const getStatusClass = (status) => ({
+  PENDENTE: 'info',
+  CONFIRMADA: 'success',
+  CONCLUIDA: 'success',
+  CANCELADA: 'danger'
+}[status] || 'info')
 
 const cancelarDiaria = async (id) => {
   if (confirm('Tem certeza que deseja cancelar esta diária?')) {
     await diariaStore.cancelar(id, authStore.user.id)
+    await loadDiarias()
   }
+}
+
+const aceitarDiaria = async (id) => {
+  await diariaStore.aceitar(id, authStore.user.id)
+  await loadDiarias()
+}
+
+function loadValoresServico() {
+  try {
+    return JSON.parse(localStorage.getItem(VALORES_KEY)) || {}
+  } catch {
+    return {}
+  }
+}
+
+const persistValoresServico = () => {
+  localStorage.setItem(VALORES_KEY, JSON.stringify(valoresServico.value))
+}
+
+const getValorServico = (diaria) => valoresServico.value[diaria.id] ?? diaria.valorServico ?? 180
+
+const updateValorServico = (diariaId, valor) => {
+  valoresServico.value = {
+    ...valoresServico.value,
+    [diariaId]: Number(valor)
+  }
+  persistValoresServico()
 }
 
 const avaliarDiaria = (id) => {
@@ -146,95 +186,92 @@ const handleAvaliar = async (nota) => {
   showModalAvaliacao.value = false
 }
 
-onMounted(async () => {
-  await diariaStore.listarPorContratante(authStore.user.id, 0, 20)
-})
+const loadDiarias = async () => {
+  if (isContratante.value) {
+    await diariaStore.listarPorContratante(authStore.user.id, 0, 20)
+  } else {
+    await diariaStore.listarPendentesPrestador(authStore.user.id, 0, 20)
+  }
+}
+
+onMounted(loadDiarias)
 </script>
 
 <style scoped>
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
 .filters {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .filter-select {
-  padding: 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  max-width: 300px;
+  max-width: 280px;
 }
 
-.grid-1 {
-  grid-template-columns: 1fr;
+.diarias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1rem;
 }
 
 .diaria-card {
-  border-left: 4px solid #667eea;
-}
-
-.diaria-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.diaria-header h3 {
-  margin: 0 0 0.25rem 0;
-}
-
-.diaria-header .text-muted {
-  margin: 0;
-}
-
-.diaria-body {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.info-item {
+  min-height: 250px;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
 }
 
-.label {
-  font-weight: 600;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.diaria-footer {
+.diaria-top {
   display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.diaria-top p {
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.diaria-info {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  background: var(--soft);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.diaria-info span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.diaria-info input {
+  margin-top: 0.35rem;
+  background: white;
+  font-weight: 800;
+}
+
+.diaria-actions {
+  margin-top: auto;
+  display: flex;
   flex-wrap: wrap;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
+  gap: 0.55rem;
 }
 
-.btn-small {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-}
-
-@media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
+@media (min-width: 1280px) {
+  .diarias-grid {
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   }
+}
 
-  .diaria-body {
+@media (max-width: 620px) {
+  .diaria-info {
     grid-template-columns: 1fr;
   }
 }

@@ -40,11 +40,11 @@ export const useDiariaStore = defineStore('diaria', () => {
     }
   }
 
-  const listarPendentesProfissional = async (contratadoId, page = 0, size = 10) => {
+  const listarPendentesPrestador = async (contratadoId, page = 0, size = 10) => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await diariaService.listarPendentesProfissional(contratadoId, page, size)
+      const response = await diariaService.listarPendentesPrestador(contratadoId, page, size)
       diariasPendentes.value = response.data.content || []
       total.value = response.data.totalElements || 0
       return diariasPendentes.value
@@ -55,11 +55,11 @@ export const useDiariaStore = defineStore('diaria', () => {
     }
   }
 
-  const aceitar = async (id, idProfissional) => {
+  const aceitar = async (id, idPrestador) => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await diariaService.aceitar(id, idProfissional)
+      const response = await diariaService.aceitar(id, idPrestador)
       diariasPendentes.value = diariasPendentes.value.filter(d => d.id !== id)
       return response.data
     } catch (err) {
@@ -110,7 +110,7 @@ export const useDiariaStore = defineStore('diaria', () => {
     total,
     solicitar,
     listarPorContratante,
-    listarPendentesProfissional,
+    listarPendentesPrestador,
     aceitar,
     avaliar,
     cancelar

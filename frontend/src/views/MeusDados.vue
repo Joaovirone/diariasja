@@ -1,21 +1,21 @@
 <template>
   <div class="container">
     <div class="page-header">
-      <h1>Meus Dados</h1>
+      <h1>Meus dados</h1>
     </div>
 
     <div class="grid grid-2">
       <div class="card">
         <div class="card-header">
-          <h2>Dados da Conta</h2>
+          <h2>Dados da conta</h2>
         </div>
         <div class="data-display">
           <div class="data-item">
-            <span class="label">Tipo de Usuário:</span>
+            <span class="label">Tipo de usuário:</span>
             <span class="value">{{ formatTipo(usuario?.tipo) }}</span>
           </div>
           <div class="data-item">
-            <span class="label">Diárias Carregadas:</span>
+            <span class="label">Diárias carregadas:</span>
             <span class="value">{{ historicoRecente.length }}</span>
           </div>
           <div class="data-item">
@@ -28,7 +28,7 @@
 
     <div class="card mt-4">
       <div class="card-header">
-        <h2>Histórico de Diárias</h2>
+        <h2>Histórico de diárias</h2>
       </div>
       <table>
         <thead>
@@ -71,7 +71,7 @@ const historicoRecente = computed(() => diariaStore.diarias)
 const concluidas = computed(() => historicoRecente.value.filter(d => d.status === 'CONCLUIDA').length)
 
 const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy', { locale: ptBR })
-const formatTipo = (tipo) => tipo === 'CONTRATANTE' ? 'Contratante' : 'Profissional'
+const formatTipo = (tipo) => tipo === 'CONTRATANTE' ? 'Contratante' : 'Prestador de serviço'
 
 const formatStatus = (status) => {
   const statusMap = {
@@ -99,7 +99,7 @@ onMounted(async () => {
   if (usuario.value?.tipo === 'CONTRATANTE') {
     await diariaStore.listarPorContratante(authStore.user.id, 0, 5)
   } else {
-    await diariaStore.listarPendentesProfissional(authStore.user.id, 0, 5)
+    await diariaStore.listarPendentesPrestador(authStore.user.id, 0, 5)
     diariaStore.diarias = diariaStore.diariasPendentes
   }
 })
@@ -132,7 +132,7 @@ onMounted(async () => {
 }
 
 .value {
-  color: #667eea;
+  color: var(--primary);
   font-weight: 500;
 }
 
