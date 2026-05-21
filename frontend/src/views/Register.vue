@@ -169,10 +169,10 @@ const handleRegister = async () => {
 .register-card {
   width: 100%;
   padding: clamp(1.5rem, 3vw, 2.25rem);
-  border: 1px solid rgba(255, 255, 255, 0.92);
+  border: none;
   border-radius: 24px;
   background: #ffffff;
-  box-shadow: 0 34px 90px rgba(2, 8, 23, 0.34);
+  box-shadow: 0 34px 90px rgba(2, 8, 23, 0.24);
 }
 
 .brand-area {
