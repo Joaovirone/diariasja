@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="app-shell">
+  <div id="app" class="app-shell" :class="{ 'auth-layout': !isLoggedIn }">
     <aside v-if="isLoggedIn" class="sidebar">
       <router-link to="/dashboard" class="brand">
         <span class="brand-mark">DJ</span>
@@ -243,6 +243,10 @@ const logout = () => {
 .main-content {
   flex: 1;
   padding: clamp(1.25rem, 2vw, 2.25rem);
+}
+
+.auth-layout .main-content {
+  padding: 0;
 }
 
 @media (max-width: 860px) {
