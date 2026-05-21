@@ -172,7 +172,7 @@ const handleRegister = async () => {
   border: none;
   border-radius: 24px;
   background: #ffffff;
-  box-shadow: 0 34px 90px rgba(2, 8, 23, 0.24);
+  box-shadow: none;
 }
 
 .brand-area {
