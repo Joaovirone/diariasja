@@ -9,13 +9,13 @@
     <section class="login-card" aria-labelledby="loginTitle">
       <div class="brand-area">
         <span class="brand-mark">DJ</span>
-        <span>Diárias Já</span>
+        <span class="brand-name">Diárias Já</span>
       </div>
 
       <div class="headline">
         <span class="eyebrow">Acesso rápido</span>
         <h1 id="loginTitle">Entre na sua conta</h1>
-        <p>Organize diárias, converse pelo chat e acompanhe contratações em poucos cliques.</p>
+        <p>Encontre prestadores de serviço, organize diárias e acompanhe contratações com uma identidade inspirada em Sergipe.</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="login-form">
@@ -91,10 +91,11 @@ const handleLogin = async () => {
   min-height: 100vh;
   min-height: 100dvh;
   padding: clamp(1.25rem, 3vw, 3rem);
+  /* 🌟 ALTERADO: Fundo azul escuro mais fechado com esferas sutis em verde e amarelo de Sergipe */
   background:
-    radial-gradient(circle at 14% 18%, rgba(22, 138, 88, 0.26), transparent 18rem),
-    radial-gradient(circle at 82% 16%, rgba(242, 183, 5, 0.16), transparent 22rem),
-    linear-gradient(135deg, #06364a 0%, #0b5967 46%, #10202b 100%);
+    radial-gradient(circle at 14% 18%, rgba(22, 138, 88, 0.22), transparent 22rem),
+    radial-gradient(circle at 82% 16%, rgba(242, 183, 5, 0.14), transparent 24rem),
+    linear-gradient(135deg, #051f2e 0%, #06364a 46%, #0b4f5f 100%);
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(380px, 480px);
   align-items: center;
@@ -122,14 +123,19 @@ const handleLogin = async () => {
   font-size: 1.05rem;
 }
 
+.brand-name {
+  color: #06364a; /* 🌟 ALTERADO: Texto da marca com o Azul de Sergipe */
+}
+
 .brand-mark {
   width: 48px;
   height: 48px;
   border-radius: 15px;
   display: grid;
   place-items: center;
+  /* 🌟 ALTERADO: Gradiente da logo usando o verde e o amarelo oficiais */
   background: linear-gradient(135deg, var(--sergipe-green), var(--sergipe-yellow));
-  color: #082f36;
+  color: #ffffff;
   font-weight: 950;
 }
 
@@ -142,15 +148,16 @@ const handleLogin = async () => {
   margin-bottom: 0.85rem;
   padding: 0.42rem 0.7rem;
   border-radius: 999px;
-  background: var(--primary-soft);
-  color: var(--primary);
+  /* 🌟 ALTERADO: Tag de acesso rápido usando tons de verde suave */
+  background: #e6f4f7;
+  color: var(--info);
   font-weight: 950;
   text-transform: uppercase;
   font-size: 0.76rem;
 }
 
 .headline h1 {
-  color: #111827;
+  color: #06364a; /* 🌟 ALTERADO: Título principal com o Azul de Sergipe */
   font-size: clamp(2.2rem, 4vw, 3.15rem);
   margin-bottom: 0.7rem;
 }
@@ -170,6 +177,17 @@ const handleLogin = async () => {
   color: #7a8699;
 }
 
+/* 🌟 APLICADO: Botão "Entrar" agora usa o Verde de Sergipe com transição para o verde escuro */
+.login-form :deep(.btn-primary) {
+  background: var(--sergipe-green) !important;
+  color: white !important;
+  box-shadow: 0 10px 20px rgba(22, 138, 88, 0.25) !important;
+}
+
+.login-form :deep(.btn-primary:hover) {
+  background: var(--sergipe-green-dark) !important;
+}
+
 .btn-full {
   width: 100%;
 }
@@ -181,9 +199,14 @@ const handleLogin = async () => {
 }
 
 .auth-footer a {
-  color: var(--primary);
+  color: var(--sergipe-green); /* 🌟 ALTERADO: Link de cadastro em verde */
   font-weight: 900;
   text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+  color: var(--sergipe-green-dark);
 }
 
 .side-note {
