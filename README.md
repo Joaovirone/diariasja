@@ -279,5 +279,3 @@ Contribuições são o que tornam a comunidade de código aberto um lugar incrí
 Distribuído sob a licença MIT.
 
 ---
-
-**Desenvolvido com ❤️ por um Dev Frontend Senior**
