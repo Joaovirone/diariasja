@@ -115,8 +115,8 @@ const logout = () => {
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: linear-gradient(135deg, #168a58, #f2b705);
-  color: #082f36;
+  background: linear-gradient(135deg, var(--sergipe-green), var(--sergipe-yellow));
+  color: #ffffff;
   font-weight: 950;
   box-shadow: 0 14px 32px rgba(22, 138, 88, 0.2);
 }

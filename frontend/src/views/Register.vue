@@ -15,7 +15,7 @@
       <div class="headline">
         <span class="eyebrow">Nova conta</span>
         <h1 id="registerTitle">Criar conta</h1>
-        <p>Informe seus dados e selecione o tipo de acesso para abrir a área correta após o login.</p>
+        <p>Informe seus dados e escolha se você é contratante ou prestador de serviço para abrir a área certa depois do login.</p>
       </div>
 
       <form @submit.prevent="handleRegister" novalidate>
@@ -157,9 +157,9 @@ const handleRegister = async () => {
   min-height: 100dvh;
   padding: clamp(1.25rem, 3vw, 3rem);
   background:
-    radial-gradient(circle at 14% 18%, rgba(22, 138, 88, 0.26), transparent 18rem),
-    radial-gradient(circle at 82% 16%, rgba(242, 183, 5, 0.16), transparent 22rem),
-    linear-gradient(135deg, #06364a 0%, #0b5967 46%, #10202b 100%);
+    radial-gradient(circle at 14% 18%, rgba(29, 184, 99, 0.18), transparent 20rem),
+    radial-gradient(circle at 82% 16%, rgba(242, 183, 5, 0.13), transparent 24rem),
+    linear-gradient(135deg, #051f2e 0%, #06364a 46%, #0b4f5f 100%);
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(420px, 620px);
   align-items: center;
@@ -191,7 +191,7 @@ const handleRegister = async () => {
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, var(--sergipe-green), var(--sergipe-yellow));
-  color: #082f36;
+  color: #ffffff;
   font-weight: 950;
 }
 
@@ -204,8 +204,8 @@ const handleRegister = async () => {
   margin-bottom: 0.7rem;
   padding: 0.42rem 0.7rem;
   border-radius: 999px;
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: #e6f4f7;
+  color: var(--info);
   font-weight: 950;
   text-transform: uppercase;
   font-size: 0.76rem;
@@ -231,9 +231,14 @@ const handleRegister = async () => {
 }
 
 .auth-footer a {
-  color: var(--primary);
+  color: var(--sergipe-green);
   font-weight: 900;
   text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+  color: var(--sergipe-green-dark);
 }
 
 .side-note {
